@@ -1,27 +1,31 @@
-//Requirements
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
-const os = require("os");
 const cookieParser = require("cookie-parser");
 
-//Express
 const app = express();
-const port = 8080;
+const port = 4000;
 
-/*Data & image stuff
+// Middleware
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../public')))
-app.use("/api/data", path.join(__dirname, '../data'))
-app.use("/api/data/images", path.join(__dirname, '../data/images'))
-app.use("/api/data/pfp", path.join(__dirname, '../data/pfp'))
-*/
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-//Routes
+// Static files
+app.use(express.static(path.join(__dirname, '../public')));
+app.use("/api/data", express.static(path.join(__dirname, '../data')));
+app.use("/api/data/images", express.static(path.join(__dirname, '../data/images')));
+app.use("/api/data/pfp", express.static(path.join(__dirname, '../data/pfp')));
+
+// Pages Routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/main/index.html'));
 });
 
+// Data routes
+const carsRoutes = require('./routes/car.js');
+app.use('/api/cars', carsRoutes);
+
+// Start server
 app.listen(port, '0.0.0.0', () => {
-    console.log("Server running on port: " + port)
-})
+    console.log("Server running on port: " + port);
+});

@@ -46,8 +46,7 @@ db.serialize(() => {
             payment_method TEXT NOT NULL,
             FOREIGN KEY (car_license_plate) REFERENCES cars(license_plate) ON DELETE CASCADE
         );
-`);
-
+    `);
 });
 
 module.exports = db;
