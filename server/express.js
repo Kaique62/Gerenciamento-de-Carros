@@ -1,5 +1,5 @@
 //Requirements
-const app = require("express");
+const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -7,14 +7,15 @@ const cookieParser = require("cookie-parser");
 
 //Express
 const app = express();
-const port = 4000;
+const port = 8080;
 
-//Data & image stuff
+/*Data & image stuff
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')))
 app.use("/api/data", path.join(__dirname, '../data'))
 app.use("/api/data/images", path.join(__dirname, '../data/images'))
 app.use("/api/data/pfp", path.join(__dirname, '../data/pfp'))
+*/
 
 //Routes
 app.get('/', (req, res) => {

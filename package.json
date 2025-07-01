@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "multer": "^2.0.1",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7"
+  }
+}
