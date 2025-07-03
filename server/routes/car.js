@@ -61,56 +61,6 @@ router.get('/images/:license_plate', (req, res) => {
     );
 });
 
-// In router.patch('/update'):
-router.patch('/update', (req, res) => {
-    const { license_plate, ...updateFields } = req.body;
-
-    if (!license_plate) {
-        return res.status(400).json({ error: "license_plate is required" });
-    }
-
-    // Build dynamic update query
-    const updates = [];
-    const values = [];
-    
-    for (const [key, value] of Object.entries(updateFields)) {
-        if (value !== undefined) {
-            let dbValue = value;
-            
-            // Handle special fields
-            if (key === 'ipva_tax_years') {
-                if (!Array.isArray(value)) {
-                    return res.status(400).json({ error: "ipva_tax_years must be an array" });
-                }
-                dbValue = JSON.stringify(value);
-            }
-            else if (['mileage', 'registration_number', 'ownership_document'].includes(key)) {
-                dbValue = parseInt(value) || null;
-            }
-            else if (key === 'price') {
-                dbValue = parseFloat(value);
-            }
-            
-            updates.push(`${key} = ?`);
-            values.push(dbValue);
-        }
-    }
-
-    if (updates.length === 0) {
-        return res.status(400).json({ error: "No valid fields to update" });
-    }
-
-    values.push(license_plate);
-    
-    const query = `UPDATE cars SET ${updates.join(', ')} WHERE license_plate = ?`;
-    
-    db.run(query, values, function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ error: "Car not found" });
-        res.json({ message: "Car updated successfully", changes: this.changes });
-    });
-});
-
 //#endregion
 //#region Car Data stuff
 router.post('/upload', (req, res) => {
