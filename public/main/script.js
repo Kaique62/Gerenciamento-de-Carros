@@ -111,19 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/update`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    license_plate: licensePlate,
-                    ...carData
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ license_plate: licensePlate, ...carData })
             });
             
-            return await response.json();
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to update car');
+            return data;
         } catch (error) {
             console.error('Failed to update car:', error);
-            return { error: 'Failed to update car' };
+            return { error: error.message };
         }
     }
 
@@ -369,8 +366,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (carToEdit.mainImage) {
             const mainImagePreview = form.querySelector('.mainImagePreview');
             const mainImageIcon = form.querySelector('.mainImageIcon');
-            if (mainImagePreview && mainImageIcon) {
-                mainImagePreview.src = carToEdit.mainImage;
+            if (additionalImages.length > 0) {
+                mainImagePreview.src = additionalImages[0].link;
                 mainImagePreview.classList.remove('hidden');
                 mainImageIcon.classList.add('hidden');
             }
@@ -379,8 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set additional images if available
         const additionalImages = await fetchCarImages(plate);
         const additionalImageContainer = form.querySelector('.additionalImageContainer');
-        if (additionalImageContainer && additionalImages.length > 0) {
+
+        if (additionalImageContainer) {
             additionalImageContainer.innerHTML = '';
+            
+            // Add existing images
             additionalImages.forEach(img => {
                 additionalImageContainer.innerHTML += `
                     <div class="relative">
@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
             
-            // Add the upload button after existing images
+            // Add upload button
             additionalImageContainer.innerHTML += `
                 <label class="relative aspect-video bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500">
                     <input type="file" name="additionalImages" accept="image/*" multiple
@@ -415,16 +415,23 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Get form data
             const formData = new FormData(form);
+
+            const ipvaYearsString = formData.get('ipva_tax_years');
+            let ipvaYearsArray = [];
+            if (ipvaYearsString) {
+                ipvaYearsArray = ipvaYearsString.split(',').map(year => year.trim());
+            }
+
             const carData = {
                 name: formData.get('name'),
-                license_plate: formData.get('license_plate'),
+                license_plate: form.dataset.editingPlate,
                 year: formData.get('year'),
                 price: parseFloat(formData.get('price')),
                 mileage: parseInt(formData.get('mileage'), 10),
                 chassis: formData.get('chassis'),
                 registration_number: formData.get('registration_number'),
                 ownership_document: formData.get('ownership_document'),
-                ipva_tax_years: formData.get('ipva_tax_years'),
+                ipva_tax_years: ipvaYearsArray,
                 description: formData.get('description'),
                 status: 'available'
             };
