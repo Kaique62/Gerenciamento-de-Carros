@@ -399,6 +399,13 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
+        // show delete button
+        const deleteButtonDiv = modal.querySelector('#delete-car-div');
+        if (deleteButtonDiv) {
+            deleteButtonDiv.classList.remove('hidden');
+        }
+
+        // Show the modal
         openModal(modal);
     }
 

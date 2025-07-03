@@ -140,16 +140,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // is dark mode
-    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-        isDarkMode = !isDarkMode;
-        if (isDarkMode) {
-            document.body.classList.remove('bg-gray-100');
-            document.body.classList.add('bg-gray-500');
-        } else {
-            document.body.classList.remove('bg-gray-500');
-            document.body.classList.add('bg-gray-100');
-        }
-    });
+    if (document.getElementById('dark-mode-toggle')) {
+        const darkModeToggle = document.getElementById('dark-mode-toggle')
+            .addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    document.body.classList.remove('bg-gray-100');
+                    document.body.classList.add('bg-gray-500');
+                } else {
+                    document.body.classList.remove('bg-gray-500');
+                    document.body.classList.add('bg-gray-100');
+                }
+            })
+    };
 
     // --- Toast Notifications ---
     function showToast(message, type = 'success', duration = 3000) {
