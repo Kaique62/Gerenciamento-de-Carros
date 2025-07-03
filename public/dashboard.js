@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoContainer = sidebar.querySelector('.logo-container');
     const collapseIcon = document.getElementById('collapse-icon-svg');
     const collapseText = toggleBtn.querySelector('.sidebar-text');
+    let isDarkMode = false
 
     const setSidebarState = (collapsed) => {
         localStorage.setItem('sidebarCollapsed', collapsed);
@@ -135,6 +136,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
+        }
+    }
+
+    // is dark mode
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+        isDarkMode = !isDarkMode;
+        if (isDarkMode) {
+            document.body.classList.remove('bg-gray-100');
+            document.body.classList.add('bg-gray-500');
+        } else {
+            document.body.classList.remove('bg-gray-500');
+            document.body.classList.add('bg-gray-100');
+        }
+    });
+
+    // --- Toast Notifications ---
+    function showToast(message, type = 'success', duration = 3000) {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            console.error('Toast container not found!');
+            return;
+        }
+
+        // Cria o elemento do toast
+        const toast = document.createElement('div');
+        
+        // Define as classes base do toast
+        toast.className = 'flex items-center gap-4 text-white p-4 rounded-lg shadow-lg transform transition-all duration-500';
+
+        // Adiciona classes de estilo com base no tipo
+        let iconHtml = '';
+        switch (type) {
+            case 'success':
+                toast.classList.add('bg-green-500');
+                // Ícone de check (Heroicons)
+                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                break;
+            case 'error':
+                toast.classList.add('bg-red-600');
+                // Ícone de erro (Heroicons)
+                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                break;
+            case 'info':
+            default:
+                toast.classList.add('bg-blue-500');
+                // Ícone de informação (Heroicons)
+                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                break
         }
     }
 });
