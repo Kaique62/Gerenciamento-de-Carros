@@ -64,7 +64,8 @@ router.get('/images/:license_plate', (req, res) => {
 //#endregion
 //#region Car Data stuff
 router.post('/upload', (req, res) => {
-    const {
+    let {
+        name,
         license_plate,
         year,
         chassis,
@@ -74,16 +75,18 @@ router.post('/upload', (req, res) => {
         description,
         registration_date,
         price,
-        ipva_tax_years
+        ipva_tax_years,
+        status
     } = req.body;
 
     if (!license_plate || !price) {
         return res.status(400).json({ error: "license_plate and price are required" });
     }
-
+    
     const query = `
         INSERT INTO cars (
             license_plate,
+            name,
             year,
             chassis,
             registration_number,
@@ -92,12 +95,14 @@ router.post('/upload', (req, res) => {
             description,
             registration_date,
             price,
-            ipva_tax_years
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ipva_tax_years,
+            status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.run(query, [
         license_plate,
+        name || null,               // ✅ Corrigido aqui
         year || null,
         chassis || null,
         registration_number || null,
@@ -106,7 +111,8 @@ router.post('/upload', (req, res) => {
         description || null,
         registration_date || null,
         price,
-        ipva_tax_years ? JSON.stringify(ipva_tax_years) : '[]'
+        ipva_tax_years ? JSON.stringify(ipva_tax_years) : '[]',
+        status || 'available'
     ], function (err) {
         if (err) {
             if (err.message.includes("UNIQUE constraint failed")) {
