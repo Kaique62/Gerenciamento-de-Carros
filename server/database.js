@@ -28,8 +28,8 @@ db.serialize(() => {
             description TEXT,
             registration_date TEXT,
             price INTEGER,
-            ipva_tax_years TEXT -- armazenar como JSON: ["2023", "2024"],
-            status TEXT CHECK(status IN ('available', 'sold', 'maintenance')) DEFAULT 'available',
+            ipva_tax_years TEXT, -- armazenar como JSON: ["2023", "2024"]
+            status TEXT CHECK(status IN ('available', 'sold', 'maintenance')) DEFAULT 'available'
         );
 
         CREATE TABLE IF NOT EXISTS images (
@@ -50,5 +50,6 @@ db.serialize(() => {
         );
     `);
 });
+
 
 module.exports = db;
