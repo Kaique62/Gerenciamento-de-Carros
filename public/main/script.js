@@ -109,17 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateCar(licensePlate, carData) {
         try {
+            carData.license_plate = licensePlate;
             const response = await fetch(`${API_URL}/update`, {
-                method: 'PATCH',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    license_plate: licensePlate,
-                    ...carData
-                })
+                body: JSON.stringify(carData)
             });
-            
+
             return await response.json();
         } catch (error) {
             console.error('Failed to update car:', error);
@@ -151,12 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
    async function createCarCard(car) {
         let mainImage;
         const images = await fetchCarImages(car.license_plate);
-        console.log(images);
         if (images.length > 0) {
             mainImage = images[0].link;
         }
         else {
-            mainImage = "https://placehold.co/600x400/000/FFF?text=No+Image";
+            mainImage = `https://placehold.co/600x400/000/FFF?text=${car.name}`;
         }
 
         const isSold = car.status === 'sold';
@@ -165,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${isSold ? `<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-10">
                 <span class="text-white text-3xl font-bold border-4 p-4 transform -rotate-12">VENDIDO</span>
             </div>` : ''}
-            <img src="${mainImage || 'https://placehold.co/600x400/000/FFF?text=No+Image'}" 
+            <img src="${mainImage}" 
                  alt="${car.name}" 
                  class="w-full h-48 object-cover">
             <div class="p-5 flex flex-col flex-grow">
@@ -263,17 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         mainImagePreview.src = '';
                         mainImageIcon.classList.remove('hidden');
                     }
-                    
-                    const additionalImageContainer = form.querySelector('.additionalImageContainer');
-                    if (additionalImageContainer) {
-                        additionalImageContainer.innerHTML = `
-                            <label class="relative aspect-video bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500">
-                                <input type="file" name="additionalImages" accept="image/*" multiple
-                                    class="absolute inset-0 opacity-0 cursor-pointer">
-                                <span class="text-4xl text-gray-400 font-light">+</span>
-                            </label>
-                        `;
-                    }
+                
                     
                     form.querySelector('h2').textContent = 'Adicionar Novo Veículo';
                     const licensePlateInput = form.querySelector('[name="license_plate"]');
@@ -365,40 +352,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Disable license plate editing
         form.querySelector('[name="license_plate"]').disabled = true;
 
-        // Set main image preview if exists
-        if (carToEdit.mainImage) {
+        let mainImage = await fetchCarImages(plate);
+
+        if (mainImage.length > 0){
             const mainImagePreview = form.querySelector('.mainImagePreview');
             const mainImageIcon = form.querySelector('.mainImageIcon');
             if (mainImagePreview && mainImageIcon) {
-                mainImagePreview.src = carToEdit.mainImage;
+                mainImagePreview.src = mainImage[0].link;
                 mainImagePreview.classList.remove('hidden');
                 mainImageIcon.classList.add('hidden');
             }
         }
-
-        // Set additional images if available
-        const additionalImages = await fetchCarImages(plate);
-        const additionalImageContainer = form.querySelector('.additionalImageContainer');
-        if (additionalImageContainer && additionalImages.length > 0) {
-            additionalImageContainer.innerHTML = '';
-            additionalImages.forEach(img => {
-                additionalImageContainer.innerHTML += `
-                    <div class="relative">
-                        <img src="${img.link}" class="w-full h-full object-cover rounded-xl">
-                    </div>
-                `;
-            });
-            
-            // Add the upload button after existing images
-            additionalImageContainer.innerHTML += `
-                <label class="relative aspect-video bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500">
-                    <input type="file" name="additionalImages" accept="image/*" multiple
-                        class="absolute inset-0 opacity-0 cursor-pointer">
-                    <span class="text-4xl text-gray-400 font-light">+</span>
-                </label>
-            `;
-        }
-
         // show delete button
         const deleteButtonDiv = modal.querySelector('#delete-car-div');
         if (deleteButtonDiv) {
@@ -438,7 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Handle images
             const mainImageFile = formData.get('mainImage');
-            const additionalImageFiles = formData.getAll('additionalImages');
             
             // Add/update car
             let result;
@@ -455,13 +418,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Upload images if any
-            if (mainImageFile.size > 0 || additionalImageFiles.some(file => file.size > 0)) {
+            if (mainImageFile.size > 0) {
                 const images = [];
                 if (mainImageFile.size > 0) images.push(mainImageFile);
-                additionalImageFiles.forEach(file => {
-                    if (file.size > 0) images.push(file);
-                });
-                
                 const uploadResult = await uploadCarImages(carData.license_plate, images);
                 if (uploadResult.error) {
                     console.error('Image upload error:', uploadResult.error);
@@ -596,30 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 preview.classList.remove('hidden');
                                 icon.classList.add('hidden');
                             }
-                        } else {
-                            // For additional images
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.classList.add('w-full', 'h-full', 'object-cover', 'rounded-xl');
-                            
-                            const imageContainer = document.createElement('div');
-                            imageContainer.classList.add('relative');
-                            imageContainer.appendChild(img);
-                            
-                            // Replace the upload button with the new image
-                            container.replaceWith(imageContainer);
-                            
-                            // Add a new upload button after the new image
-                            const newUploadContainer = document.createElement('label');
-                            newUploadContainer.classList.add('relative', 'aspect-video', 'bg-gray-200', 'border-2', 'border-dashed', 'rounded-xl', 'flex', 'items-center', 'justify-center', 'cursor-pointer', 'hover:border-blue-500');
-                            newUploadContainer.innerHTML = `
-                                <input type="file" name="additionalImages" accept="image/*" multiple
-                                    class="absolute inset-0 opacity-0 cursor-pointer">
-                                <span class="text-4xl text-gray-400 font-light">+</span>
-                            `;
-                            
-                            const parent = document.querySelector('.additionalImageContainer');
-                            parent.appendChild(newUploadContainer);
                         }
                     }
                     

@@ -290,11 +290,6 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="registration_date">Registration Date</label>
-                        <input type="date" id="registration_date" name="registration_date">
-                    </div>
-                    
-                    <div class="form-group">
                         <label for="ipva_tax_years">IPVA Tax Years (comma separated)</label>
                         <input type="text" id="ipva_tax_years" name="ipva_tax_years" placeholder="2023,2024">
                     </div>
@@ -394,7 +389,6 @@
                     ownership_document: document.getElementById('ownership_document').value,
                     mileage: document.getElementById('mileage').value,
                     description: document.getElementById('description').value,
-                    registration_date: document.getElementById('registration_date').value,
                     price: document.getElementById('price').value,
                     ipva_tax_years: document.getElementById('ipva_tax_years').value.split(',').map(y => y.trim())
                 };
@@ -505,7 +499,6 @@
                             <p><strong>Year:</strong> ${car.year || 'N/A'}</p>
                             <p><strong>Price:</strong> $${car.price}</p>
                             <p><strong>Mileage:</strong> ${car.mileage || 'N/A'} km</p>
-                            <p><strong>Registration Date:</strong> ${car.registration_date || 'N/A'}</p>
                             <p><strong>Description:</strong> ${car.description || 'N/A'}</p>
                             <div class="car-images" id="images-${car.license_plate}">
                                 Loading images...

@@ -26,7 +26,6 @@ db.serialize(() => {
             ownership_document INTEGER,
             mileage INTEGER,
             description TEXT,
-            registration_date TEXT,
             price INTEGER,
             ipva_tax_years TEXT, -- armazenar como JSON: ["2023", "2024"]
             status TEXT CHECK(status IN ('available', 'sold', 'maintenance')) DEFAULT 'available'
