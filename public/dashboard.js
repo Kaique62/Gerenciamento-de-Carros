@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Active Page Highlight ---
     const currentPagePath = window.location.pathname.split('/').pop();
-    const activePageId = (currentPagePath === '' || currentPagePath === 'index.html') ? 'home'
+    const activePageId = (currentPagePath === '' || currentPagePath === 'index.html') ? 'main'
                      : currentPagePath.replace('.html', '');
 
     const activeNavItem = document.getElementById(`nav-${activePageId}`);
