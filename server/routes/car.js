@@ -21,9 +21,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/images/upload', upload.array('images', 10), (req, res) => {
+router.post('/images/upload', upload.array('images', 10), async (req, res) => {
+    /*
+        Todo: carrosel de imagens,
+        Imagem entra com index e link,
+        index 0 = imagem principal,
+        index > 0 = imagens adicionais,
+        possibilidade de exclusão de imagem, via idx e car_plate
+    */
+
     const licensePlate = req.body.license_plate;
   
+    const checkExistingImage = db.prepare(`
+        Select * FROM images WHERE car_license_plate = ${req.body.license_plate}
+    `).get();
+
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
     }
@@ -31,17 +43,25 @@ router.post('/images/upload', upload.array('images', 10), (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No files uploaded' });
     }
-  
-    const insertImage = db.prepare(`
-        INSERT INTO images (car_license_plate, link, idx)
-        VALUES (?, ?, ?)
-    `);
-  
-    req.files.forEach((file, index) => {
-        const relativePath = `/api/data/images/${file.filename}`;
-        insertImage.run(licensePlate, relativePath, index);
-    });
-  
+
+    let insertImage;
+    const imagePath = "/api/data/images/" + req.files[0].filename;
+
+    if (checkExistingImage.length == 0) {
+        insertImage = db.prepare(`
+            UPDATE images
+            SET link = ?
+            WHERE car_license_plate = ?
+        `);
+        insertImage.run(`/api/data/images/${req.files[0].filename}`, licensePlate);
+    } else {
+        insertImage = db.prepare(`
+            INSERT INTO images (car_license_plate, link, idx)
+            VALUES (?, ?, ?)
+        `);
+        insertImage.run(req.body.license_plate, `/api/data/images/${req.files[0].filename}`, 0);
+    }
+
     insertImage.finalize();
   
     res.json({ message: 'Images uploaded successfully', files: req.files.map(f => f.filename) });
@@ -179,7 +199,7 @@ router.get('/retrieve', (req, res) => {
                 };
             }
         });
-        
+
         res.json(carsWithParsedData);
     });
 });

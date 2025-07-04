@@ -149,13 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render Functions
    async function createCarCard(car) {
-        let mainImage = car.mainImage || 'https://placehold.co/600x400/000/FFF?text=No+Image';
-        if (mainImage) {
-            const images = await fetchCarImages(car.license_plate);
-            if (images.length > 0) {
-                mainImage = images[0].link;
-                console.log(mainImage)
-            }
+        let mainImage;
+        const images = await fetchCarImages(car.license_plate);
+        console.log(images);
+        if (images.length > 0) {
+            mainImage = images[0].link;
+        }
+        else {
+            mainImage = "https://placehold.co/600x400/000/FFF?text=No+Image";
         }
 
         const isSold = car.status === 'sold';
@@ -290,13 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const car = cars.find(c => c.license_plate === plate);
         if (!car || !detailsModal) return;
 
-        // Fetch images for this car
-        let mainImage = car.mainImage || 'https://placehold.co/600x400/000/FFF?text=No+Image';
-        if (!car.mainImage) {
-            const images = await fetchCarImages(plate);
-            if (images.length > 0) {
-                mainImage = images[0].link;
-            }
+        const images = await fetchCarImages(plate);
+        if (images.length > 0) {
+            mainImage = images[0].link;
+        }
+        else {
+            mainImage = "https://placehold.co/600x400/000/FFF?text=No+Image";
         }
 
         detailsModal.querySelector('#details-modal-title').textContent = car.name;
