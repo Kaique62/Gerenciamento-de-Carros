@@ -49,16 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function creatSellCard(sell) {
         const sellGrid = document.getElementById("sell-grid");
-        const sell = {
-            license_plate: "ABC-1234",
-            name: "Honda Civic",
-            image: "https://placehold.co/200x140/000/FFF?text=Honda+Civic",
-            price: 20000,
-            sold_by: "John Doe",
-            date: "2023-10-01",
-            method: "Online",
-            sale_date: "2023-10-02"
-        };
 
         sellGrid.innerHTML += `
             <div id="sell-${sell.license_plate}"
@@ -68,12 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="p-4 flex flex-col justify-between flex-grow">
                     <div>
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-gray-800 truncate" title="${sell.name}">doasda
+                            <h3 class="text-lg font-bold text-gray-800 truncate" title="${sell.name}">${sell.name}</h3>
                             </h3>
+                            <span class="text-sm text-gray-500">${sell.license_plate}</span>
                         </div>
-                        <p class="text-sm text-gray-500"></p>
+
+                        <p class="text-sm text-gray-500">${sell.sold_by}</p>
                         <div class="text-sm text-gray-700 mt-2">
-                            <p class="text-green-600"><span class="font-semibold">Vendido por:</span> ${sell.sold_by}
+                            <p class="text-green-600"><span class="font-semibold">Vendido por:</span> ${sell.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                             </p>
                             <p><span class="font-semibold">Data:</span> ${new Date(sell.date).toLocaleDateString()}</p>
                             <p><span class="font-semibold">Metodo:</span> ${sell.method}</p>
@@ -83,14 +75,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
-
-        sellGrid.appendChild(card);
     }
 
     // Initialize the application
     async function initApp() {
-        initEventListeners();
-        await renderSellCards();
+        //initEventListeners();
+        //await renderSellCards();
+        creatSellCard({
+            license_plate: "ABC-1234",
+            name: "Honda Civic",
+            image: "https://placehold.co/200x140/000/FFF?text=Honda+Civic",
+            price: 20000,
+            sold_by: "John Doe",
+            date: "2023-10-01",
+            method: "Parcelado em 12x",
+            sale_date: "2023-10-02"
+        });
     }
 
     // Start the app
