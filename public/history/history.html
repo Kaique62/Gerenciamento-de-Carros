@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GDC: Historico</title>
+    <title>GDV: Historico</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../base.css">
@@ -31,11 +31,11 @@
                     <i class="bi bi-clock-history"></i>
                     <span class="sidebar-text ml-4">Historico</span>
                 </a>
-                <a href="../analytics/analytics.html" id="nav-analytics"
+                <!-- <a href="../analytics/analytics.html" id="nav-analytics"
                     class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
                     <i class="bi bi-graph-up-arrow"></i>
                     <span class="sidebar-text ml-4">Relatórios</span>
-                </a>
+                </a> -->
                 <a href="../settings/settings.html" id="nav-settings"
                     class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
                     <svg class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -94,37 +94,7 @@
                     </div>
                 </div>
 
-                <div id="car-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <div id="card-${car.license_plate}"
-                        class="flex bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 w-full h-auto">
-
-                        <!-- Imagem à esquerda -->
-                        <img src="https://placehold.co/200x140/000/FFF?text=Honda+Civic" alt="${car.name}"
-                            class="w-40 h-auto object-cover">
-
-                        <!-- Conteúdo à direita -->
-                        <div class="p-4 flex flex-col justify-between flex-grow">
-                            <div>
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-lg font-bold text-gray-800 truncate" title="${car.name}">doasda
-                                    </h3>
-                                </div>
-
-                                <p class="text-sm text-gray-500">0000/0000</p>
-                                <p class="text-xl font-bold text-green-600 mt-1">0000</p>
-
-                                <div class="text-sm text-gray-700 mt-2">
-                                    <p><span class="font-semibold">Placa:</span> 101010</p>
-                                    <p><span class="font-semibold">Vendido por:</span> 0101010</p>
-                                    <p><span class="font-semibold">Data da venda:</span> 00/00/0000</p>
-                                    <p><span class="font-semibold">Preço de venda:</span> 00000
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
+                <div id="sell-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 </div>
 
             </div>

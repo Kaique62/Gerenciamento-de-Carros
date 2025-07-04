@@ -96,47 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Analytics Page Chart ---
-    if (activePageId === 'analytics') {
-        const ctx = document.getElementById('salesChart');
-        if (ctx && typeof Chart !== 'undefined') {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho'],
-                    datasets: [{
-                        label: 'Vendas',
-                        data: [2400, 1398, 9800, 3908, 4800, 3800, 4300],
-                        backgroundColor: 'rgba(136, 132, 216, 0.8)',
-                        borderRadius: 4,
-                    }, {
-                        label: 'Visitantes',
-                        data: [4000, 3000, 2000, 2780, 1890, 2390, 3490],
-                        backgroundColor: 'rgba(130, 202, 157, 0.8)',
-                        borderRadius: 4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' } }, x: { grid: { display: false } } },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
-                        tooltip: { 
-                            backgroundColor: '#fff',
-                            titleColor: '#333',
-                            bodyColor: '#666',
-                            borderColor: '#ddd',
-                            borderWidth: 1,
-                            padding: 10,
-                            displayColors: true,
-                            boxPadding: 4,
-                            usePointStyle: true,
-                        }
-                    }
-                }
-            });
-        }
+    // --- history Page Chart ---
+    if (activePageId === 'history') {
     }
 
     // is dark mode

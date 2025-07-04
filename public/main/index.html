@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GDC: Estoque</title>
+    <title>GDV: Estoque</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../base.css">
@@ -31,11 +31,11 @@
                     <i class="bi bi-clock-history"></i>
                     <span class="sidebar-text ml-4">Historico</span>
                 </a>
-                <a href="../analytics/analytics.html" id="nav-analytics"
+                <!-- <a href="../analytics/analytics.html" id="nav-analytics"
                     class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
                     <i class="bi bi-graph-up-arrow"></i>
                     <span class="sidebar-text ml-4">Relatórios</span>
-                </a>
+                </a> -->
                 <a href="../settings/settings.html" id="nav-settings"
                     class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
                     <svg class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -64,12 +64,10 @@
                 <p class="text-gray-600 mt-2">Adicione, visualize, edite e remova seus veículos.</p>
             </header>
 
-            <!-- Tools section -->
-            <div class="flex justify-between items-center gap-4 mb-6 p-3 rounded-lg bg-gray-800 text-white">
-                <!-- Campo de busca e filtro -->
+            <div
+                class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 p-3 rounded-lg bg-gray-800 text-white">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
 
-                    <!-- Campo de busca -->
                     <div class="relative w-full sm:w-80">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="bi bi-search text-gray-400"></i>
@@ -79,7 +77,6 @@
                             placeholder="Pesquisar por placa, modelo..." />
                     </div>
 
-                    <!-- Filtro de status -->
                     <div class="w-full sm:w-56">
                         <select id="filter-select"
                             class="block w-full py-2 px-3 rounded-md bg-gray-700 border border-gray-600 text-white text-sm focus:ring-blue-500 focus:border-blue-500">
@@ -92,23 +89,20 @@
 
                 </div>
 
-                <!-- Ações -->
-                <div class="flex items-center gap-4">
-                    <!-- Botão para editar carro -->
-                    <div class="flex items-center">
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+                    <div class="flex items-center w-full sm:w-auto">
                         <input type="text" id="plate-search"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-r-none"
-                            placeholder="Placa do Veiculo" />
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-r-none w-full"
+                            placeholder="Placa..." />
                         <button type="submit" id="edit-by-plate-button"
                             class="inline-flex items-center py-2.5 px-3 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-l-none">
                             Editar
                         </button>
                     </div>
 
-                    <!-- Botão para abrir o modal de adicionar carro -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center w-full sm:w-auto">
                         <button id="open-add-modal-button" type="button"
-                            class="inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5">
+                            class="inline-flex items-center justify-center gap-2 text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5 w-full">
                             <i class="bi bi-plus-circle-fill"></i>
                             Adicionar
                         </button>
@@ -182,6 +176,7 @@
                                 <span class="mainImageIcon text-6xl text-gray-400 font-light">+</span>
                             </label>
                         </div>
+                    <!--
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais</label>
                             <div class="additionalImageContainer grid grid-cols-3 gap-2">
@@ -193,41 +188,52 @@
                                 </label>
                             </div>
                         </div>
-                        <div id="delete-car-div" class="hidden flex flex-col gap-2 bg-red-400 p-4 rounded-lg border border-red-500 mt-5">
+                    -->
+                        <div id="delete-car-div"
+                            class="hidden flex flex-col gap-2 bg-red-400 p- rounded-lg border border-red-500 mt-5">
                             <label class="block mb-2 text font-medium text-black-700">Excluir Carro</label>
                             <input placeholder="Escreva 'Excluir' para excluir"
                                 class="w-full rounded-lg px-4 py-2 bg-red-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            <button type="button" class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">Confirmar Exclução</button>
+                            <button type="button"
+                                class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">Confirmar
+                                Exclução</button>
                         </div>
                     </div>
                     <!-- Coluna de Campos -->
                     <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
                         <div>
-                            <label for="add-name" class="block mb-1 text-sm font-medium text-gray-700">Nome / Modelo *</label>
+                            <label for="add-name" class="block mb-1 text-sm font-medium text-gray-700">Nome / Modelo
+                                *</label>
                             <input type="text" id="add-name" name="name" placeholder="Ex: Honda Civic"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required />
                         </div>
                         <div>
-                            <label for="add-license_plate" class="block mb-1 text-sm font-medium text-gray-700">Placa *</label>
+                            <label for="add-license_plate" class="block mb-1 text-sm font-medium text-gray-700">Placa
+                                *</label>
                             <input type="text" id="add-license_plate" name="license_plate" placeholder="Ex: ABC-1234"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required />
                         </div>
                         <div>
-                            <label for="add-year" class="block mb-1 text-sm font-medium text-gray-700">Ano / Modelo</label>
+                            <label for="add-year" class="block mb-1 text-sm font-medium text-gray-700">Ano /
+                                Modelo</label>
                             <input type="text" id="add-year" name="year" placeholder="Ex: 2020/2021"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
-                            <label for="add-price" class="block mb-1 text-sm font-medium text-gray-700">Preço (R$) *</label>
+                            <label for="add-price" class="block mb-1 text-sm font-medium text-gray-700">Preço (R$)
+                                *</label>
                             <input type="number" id="add-price" name="price" placeholder="Ex: 75000.00"
-                                class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" step="0.01" required />
+                                class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                step="0.01" required />
                         </div>
                         <div>
-                            <label for="add-mileage" class="block mb-1 text-sm font-medium text-gray-700">Quilometragem (KM) *</label>
+                            <label for="add-mileage" class="block mb-1 text-sm font-medium text-gray-700">Quilometragem
+                                (KM) *</label>
                             <input type="number" id="add-mileage" name="mileage" placeholder="Ex: 45000"
-                                class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                                class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required />
                         </div>
                         <div>
                             <label for="add-chassis" class="block mb-1 text-sm font-medium text-gray-700">Chassi</label>
@@ -235,23 +241,31 @@
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
-                            <label for="add-registration_number" class="block mb-1 text-sm font-medium text-gray-700">RENAVAM</label>
-                            <input type="number" id="add-registration_number" name="registration_number" placeholder="Número do RENAVAM"
+                            <label for="add-registration_number"
+                                class="block mb-1 text-sm font-medium text-gray-700">RENAVAM</label>
+                            <input type="number" id="add-registration_number" name="registration_number"
+                                placeholder="Número do RENAVAM"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
-                            <label for="add-ownership_document" class="block mb-1 text-sm font-medium text-gray-700">CRV / ATPV-e</label>
-                            <input type="number" id="add-ownership_document" name="ownership_document" placeholder="Número do documento"
+                            <label for="add-ownership_document" class="block mb-1 text-sm font-medium text-gray-700">CRV
+                                / ATPV-e</label>
+                            <input type="number" id="add-ownership_document" name="ownership_document"
+                                placeholder="Número do documento"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="add-ipva_tax_years" class="block mb-1 text-sm font-medium text-gray-700">Anos de IPVA Pago</label>
-                            <input type="text" id="add-ipva_tax_years" name="ipva_tax_years" placeholder="Ex: 2022, 2023, 2024"
+                            <label for="add-ipva_tax_years" class="block mb-1 text-sm font-medium text-gray-700">Anos de
+                                IPVA Pago</label>
+                            <input type="text" id="add-ipva_tax_years" name="ipva_tax_years"
+                                placeholder="Ex: 2022, 2023, 2024"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="add-description" class="block mb-1 text-sm font-medium text-gray-700">Descrição</label>
-                            <textarea id="add-description" name="description" placeholder="Detalhes sobre o veículo, opcionais, estado de conservação..." rows="3"
+                            <label for="add-description"
+                                class="block mb-1 text-sm font-medium text-gray-700">Descrição</label>
+                            <textarea id="add-description" name="description"
+                                placeholder="Detalhes sobre o veículo, opcionais, estado de conservação..." rows="3"
                                 class="w-full rounded-lg px-4 py-2 bg-white border border-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                         </div>
                     </div>
