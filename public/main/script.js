@@ -550,6 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Open add modal
         else if (target.closest('#open-add-modal-button')) {
             openModal(addModal);
+            const deleteButtonDiv = addModal.querySelector('#delete-car-div');
+            if (deleteButtonDiv) {
+                deleteButtonDiv.classList.add('hidden');
+            }
         }
         // Close modal
         else if (target.closest('.js-close-modal')) {
