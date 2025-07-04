@@ -93,7 +93,6 @@ router.post('/upload', (req, res) => {
         ownership_document,
         mileage,
         description,
-        registration_date,
         price,
         ipva_tax_years,
         status
@@ -113,23 +112,21 @@ router.post('/upload', (req, res) => {
             ownership_document,
             mileage,
             description,
-            registration_date,
             price,
             ipva_tax_years,
             status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.run(query, [
         license_plate,
-        name || null,               // ✅ Corrigido aqui
+        name || null,               
         year || null,
         chassis || null,
         registration_number || null,
         ownership_document || null,
         mileage || null,
         description || null,
-        registration_date || null,
         price,
         ipva_tax_years ? JSON.stringify(ipva_tax_years) : '[]',
         status || 'available'
@@ -143,6 +140,86 @@ router.post('/upload', (req, res) => {
         res.status(201).json({ message: "Car uploaded successfully", license_plate });
     });
 });
+
+router.post('/update', (req, res) => {
+    let {
+        name,
+        license_plate,
+        year,
+        chassis,
+        registration_number,
+        ownership_document,
+        mileage,
+        description,
+        price,
+        ipva_tax_years,
+        status
+    } = req.body;
+
+    console.log(`
+        name: ${name},
+        license_plate: ${license_plate},
+        year: ${year},
+        chassis: ${chassis},
+        registration_number: ${registration_number},
+        ownership_document: ${ownership_document},
+        mileage: ${mileage},
+        description: ${description},
+        price: ${price},
+        ipva_tax_years: ${ipva_tax_years},
+        status: ${status}
+    `);
+
+    if (
+        !name || !license_plate || !year || !chassis || !registration_number ||
+        !ownership_document || !mileage || !description || !price ||
+        !ipva_tax_years || !status
+    ) {
+        return res.status(400).json({ error: "alguns campos estão faltando!" });
+    }
+
+    const query = `
+        UPDATE cars SET
+            name = ?,
+            year = ?,
+            chassis = ?,
+            registration_number = ?,
+            ownership_document = ?,
+            mileage = ?,
+            description = ?,
+            price = ?,
+            ipva_tax_years = ?,
+            status = ?
+        WHERE license_plate = ?
+    `;
+
+    const values = [
+        name,
+        year,
+        chassis,
+        registration_number,
+        ownership_document,
+        mileage,
+        description,
+        price,
+        ipva_tax_years ? JSON.stringify(ipva_tax_years) : '[]',
+        status,
+        license_plate // usado no WHERE
+    ];
+
+    console.log("a rodar!");
+
+    db.run(query, values, function(err) {
+        if (err) {
+            console.error("Erro ao atualizar:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        console.log("rodou");
+        return res.status(200).json({ message: "Dados Atualizados!" });
+    });
+});
+
 
 router.get('/retrieve', (req, res) => {
     const {
