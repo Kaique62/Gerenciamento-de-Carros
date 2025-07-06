@@ -176,7 +176,7 @@
                                 <span class="mainImageIcon text-6xl text-gray-400 font-light">+</span>
                             </label>
                         </div>
-                    <!--
+                        <!--
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais</label>
                             <div class="additionalImageContainer grid grid-cols-3 gap-2">
@@ -281,65 +281,72 @@
         </div>
     </div>
 
-    <!-- modal: vender carro -->
+    <!-- modal: registrar venda -->
     <div id="sell-modal" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-75 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen p-4">
+
             <form id="sell-car-form"
-                class="modal-panel bg-white rounded-2xl w-full max-w-2xl shadow-2xl relative border">
+                class="modal-panel bg-white rounded-2xl w-full max-w-lg shadow-2xl relative border border-gray-200">
+
+                <!-- Cabeçalho do Modal -->
                 <div class="flex items-start justify-between p-6 border-b">
                     <div>
                         <h2 class="text-3xl font-bold text-gray-800">Registrar Venda</h2>
-                        <p class="text-gray-600">Confirme os detalhes da transação.</p>
+                        <p class="text-gray-600 mt-1">Confirme os detalhes da transação.</p>
                     </div>
                     <button type="button" class="js-close-modal text-gray-400 hover:text-red-600 text-3xl">×</button>
                 </div>
+
+                <!-- Corpo do Modal -->
                 <div class="p-6 space-y-6">
+                    <!-- Informações do Veículo (serão preenchidas por JS) -->
                     <div class="bg-gray-100 p-4 rounded-lg border">
-                        <h3 id="sell-modal-car-name" class="font-bold text-lg text-gray-900"></h3>
-                        <p class="text-sm text-gray-500">Placa: <span id="sell-modal-car-plate"
-                                class="font-mono font-semibold"></span></p>
+                        <h3 id="sell-modal-car-name" class="font-bold text-lg text-gray-900">Nome do Veículo Aqui</h3>
+                        <p class="text-sm text-gray-500">Placa:
+                            <span id="sell-modal-car-plate" class="font-mono font-semibold">ABC-1234</span>
+                        </p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- Campos do Formulário -->
+                    <div class="grid grid-cols-1 gap-5">
+                        <!-- Campo oculto para enviar a placa com o formulário -->
+                        <input type="hidden" id="sell-modal-hidden-plate" name="car_license_plate" />
+
                         <div>
-                            <label for="sale_price" class="block text-sm font-medium text-gray-700">Preço da Venda
+                            <label for="sale_value" class="block text-sm font-medium text-gray-700 mb-1">Valor da Venda
                                 (R$)</label>
-                            <input type="number" name="sale_price" id="sale_price" step="0.01"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
+                            <input type="number" name="sale_value" id="sale_value" placeholder="Ex: 55000.00"
+                                step="0.01"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required />
                         </div>
+
                         <div>
-                            <label for="sale_date" class="block text-sm font-medium text-gray-700">Data da Venda</label>
+                            <label for="sale_date" class="block text-sm font-medium text-gray-700 mb-1">Data da
+                                Venda</label>
                             <input type="date" name="sale_date" id="sale_date"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required />
                         </div>
-                        <div class="md:col-span-2">
-                            <label for="buyer_name" class="block text-sm font-medium text-gray-700">Nome do
-                                Comprador</label>
-                            <input type="text" name="buyer_name" id="buyer_name"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
-                        </div>
+
                         <div>
-                            <label for="buyer_document" class="block text-sm font-medium text-gray-700">CPF/CNPJ</label>
-                            <input type="text" name="buyer_document" id="buyer_document"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
-                        </div>
-                        <div>
-                            <label for="payment_method" class="block text-sm font-medium text-gray-700">Forma de
+                            <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">Forma de
                                 Pagamento</label>
                             <select name="payment_method" id="payment_method"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                <option>Financiamento</option>
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required>
                                 <option>À Vista (Pix/TED)</option>
+                                <option>Financiamento</option>
                                 <option>Troca</option>
+                                <option>Consórcio</option>
+                                <option>Outro</option>
                             </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="sale_notes" class="block text-sm font-medium text-gray-700">Observações</label>
-                            <textarea name="sale_notes" id="sale_notes" rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end gap-3 p-6 border-t">
+
+                <!-- Rodapé com Botões -->
+                <div class="flex justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-2xl">
                     <button type="button"
                         class="js-close-modal px-6 py-2 rounded-lg border bg-white text-gray-700 hover:bg-gray-100">Cancelar</button>
                     <button type="submit"
@@ -347,6 +354,7 @@
                         Venda</button>
                 </div>
             </form>
+
         </div>
     </div>
 

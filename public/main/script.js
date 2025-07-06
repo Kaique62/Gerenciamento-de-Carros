@@ -7,6 +7,7 @@ ex da Api: https://www.npmjs.com/package/sinesp-api
 document.addEventListener('DOMContentLoaded', () => {
     // API Endpoints (replace with your actual endpoints)
     const API_URL = '/api/cars';
+    const API_URL_SELL = '/api/sales';
     const IMAGE_UPLOAD_URL = '/api/cars/images/upload';
     const CAR_STATUSES = ['available', 'sold', 'maintenance'];
 
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchCars() {
         try {
             const response = await fetch(`${API_URL}/retrieve`);
-            const data = await response.json();
+            const data = await response.json({status: 'available'});
             
             if (data.error) {
                 console.error('Error fetching cars:', data.error);
@@ -125,17 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function sellCar(licensePlate, saleData) {
+    async function sellCar(saleData) {
         try {
-            const response = await fetch(`${API_URL}/sell`, {
+            const response = await fetch(`${API_URL_SELL}/sales/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    license_plate: licensePlate,
-                    ...saleData
-                })
+                body: JSON.stringify(saleData)
             });
             
             return await response.json();
@@ -312,7 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sellModal.querySelector('#sell-modal-car-name').textContent = car.name;
         sellModal.querySelector('#sell-modal-car-plate').textContent = car.license_plate;
-        sellModal.querySelector('#sale_price').value = car.price || '';
+        sellModal.querySelector('#sell-modal-hidden-plate').textContent = car.license_plate;
+        sellModal.querySelector('#sale_value').value = car.price || '';
         
         // Set today as default sale date
         const today = new Date().toISOString().split('T')[0];
@@ -455,19 +454,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Get form data
             const saleData = {
-                sale_price: parseFloat(form.querySelector('#sale_price').value),
-                sale_date: form.querySelector('#sale_date').value,
-                buyer_name: form.querySelector('#buyer_name').value,
-                buyer_document: form.querySelector('#buyer_document').value,
+                car_license_plate: plate,
+                sale_value: parseFloat(form.querySelector('#sale_value').value),
+                date: form.querySelector('#sale_date').value,
                 payment_method: form.querySelector('#payment_method').value,
-                sale_notes: form.querySelector('#sale_notes').value
             };
             
+            console.log('Sale Data:', saleData);
             // Register sale
-            const result = await sellCar(plate, saleData);
-            if (result.error) {
-                throw new Error(result.error);
-            }
+            const result = await sellCar(saleData);
+            //if (result.error) {
+            //    throw new Error(result.error);
+            //}
             
             // Refresh car list
             await renderCarCards();

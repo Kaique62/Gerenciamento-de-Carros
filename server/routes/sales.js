@@ -27,6 +27,21 @@ router.post('/sales/add', (req, res) => {
             id: this.lastID
         });
     });
+
+    const queryUpdate = `
+        UPDATE cars
+        SET status = 'sold'
+        WHERE license_plate = ?
+    `;
+    // Atualiza o status do carro para 'sold'
+    db.run(queryUpdate, [car_license_plate], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ error: 'Carro não encontrado.' });
+        }
+    });
 });
 
 // filtro uau

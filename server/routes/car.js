@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const multer = require('multer');
 const path = require('path');
+const { stat } = require('fs');
 
 //#region IMAGE STUFF
 const storage = multer.diskStorage({
@@ -228,7 +229,8 @@ router.get('/retrieve', (req, res) => {
         chassis,
         registration_number,
         priceMin,
-        priceMax
+        priceMax,
+        status
     } = req.query;
 
     //Kinda of a stoopid way to not condition the WHERE
@@ -258,6 +260,10 @@ router.get('/retrieve', (req, res) => {
     if (priceMax) {
         query += " AND price <= ?";
         params.push(priceMax);
+    }
+    if (status) {
+        query += " AND status = ?";
+        params.push(status);
     }
 
     db.all(query, params, (err, rows) => {
