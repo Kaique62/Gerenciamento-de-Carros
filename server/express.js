@@ -21,9 +21,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/main/index.html'));
 });
 
-// Data routes
+// Car routes
 const carsRoutes = require('./routes/car.js');
 app.use('/api/cars', carsRoutes);
+
+// Sales routes
+const salesRoutes = require('./routes/sales.js');
+app.use('/api/sales', salesRoutes);
 
 // Start server
 app.listen(port, '0.0.0.0', () => {
