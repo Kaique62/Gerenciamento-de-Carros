@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.querySelector('[name="description"]').value = carToEdit.description || '';
 
         // Disable license plate editing
-        form.querySelector('[name="license_plate"]').disabled = true;
+        //form.querySelector('[name="license_plate"]').disabled = true; não pode estar necessáriamente desabilitada, caso ele erre a placa nao teria como mudar
 
         let mainImage = await fetchCarImages(plate);
 
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleEditByPlateClick() {
-        const plate = plateSearchInput.value.trim().toUpperCase();
+        const plate = plateSearchInput.value.trim();
         
         if (!plate) {
             alert('Por favor, digite uma placa para editar.');

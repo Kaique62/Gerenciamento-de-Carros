@@ -173,7 +173,7 @@ router.post('/update', (req, res) => {
 
     if (
         !name || !license_plate || !year || !chassis || !registration_number ||
-        !ownership_document || !mileage || !description || !price ||
+        !ownership_document || !mileage || !price ||
         !ipva_tax_years || !status
     ) {
         return res.status(400).json({ error: "alguns campos estão faltando!" });
