@@ -22,25 +22,25 @@ router.post('/sales/add', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
 
+        const queryUpdate = `
+            UPDATE cars
+            SET status = 'sold'
+            WHERE license_plate = ?
+        `;
+        
+        db.run(queryUpdate, [car_license_plate], function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ error: 'Carro não encontrado.' });
+            }
+        });
+
         res.status(201).json({
             message: 'Venda registrada com sucesso.',
             id: this.lastID
         });
-    });
-
-    const queryUpdate = `
-        UPDATE cars
-        SET status = 'sold'
-        WHERE license_plate = ?
-    `;
-    // Atualiza o status do carro para 'sold'
-    db.run(queryUpdate, [car_license_plate], function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (this.changes === 0) {
-            return res.status(404).json({ error: 'Carro não encontrado.' });
-        }
     });
 });
 
