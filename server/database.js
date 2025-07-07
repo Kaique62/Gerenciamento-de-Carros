@@ -20,7 +20,7 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS cars (
             license_plate TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            year TEXT CHECK(length(year) <= 9),
+            year TEXT NOT NULL,
             chassis TEXT,
             registration_number INTEGER,
             ownership_document INTEGER,
