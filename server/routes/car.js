@@ -40,6 +40,7 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
         `).get(licensePlate);
 
         const imagePath = `/api/data/images/${req.files[0].filename}`;
+        console.log(imagePath);
 
         if (existingImage) {
             // Atualiza imagem principal existente
