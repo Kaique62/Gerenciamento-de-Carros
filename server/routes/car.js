@@ -24,6 +24,8 @@ const upload = multer({ storage });
 router.post('/images/upload', upload.array('images', 10), async (req, res) => {
     const licensePlate = req.body.license_plate;
 
+    console.log(licensePlate)
+
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
     }
