@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../database');
 const multer = require('multer');
 const path = require('path');
-const { stat } = require('fs');
 
 //#region IMAGE STUFF
 const storage = multer.diskStorage({
@@ -23,49 +22,48 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/images/upload', upload.array('images', 10), async (req, res) => {
-    /*
-        Todo: carrosel de imagens,
-        Imagem entra com index e link,
-        index 0 = imagem principal,
-        index > 0 = imagens adicionais,
-        possibilidade de exclusão de imagem, via idx e car_plate
-    */
-
     const licensePlate = req.body.license_plate;
-  
-    const checkExistingImage = db.prepare(`
-        SELECT * FROM images WHERE car_license_plate = ?
-    `).get(licensePlate);
 
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
     }
-  
+
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    let insertImage;
-    const imagePath = "/api/data/images/" + req.files[0].filename;
+    try {
+        const existingImage = db.prepare(`
+            SELECT * FROM images WHERE car_license_plate = ?
+        `).get(licensePlate);
 
-    if (checkExistingImage.length == 0) {
-        insertImage = db.prepare(`
-            UPDATE images
-            SET link = ?
-            WHERE car_license_plate = ?
-        `);
-        insertImage.run(`/api/data/images/${req.files[0].filename}`, licensePlate);
-    } else {
-        insertImage = db.prepare(`
-            INSERT INTO images (car_license_plate, link, idx)
-            VALUES (?, ?, ?)
-        `);
-        insertImage.run(req.body.license_plate, `/api/data/images/${req.files[0].filename}`, 0);
+        const imagePath = `/api/data/images/${req.files[0].filename}`;
+
+        if (existingImage) {
+            // Atualiza imagem principal existente
+            const updateImage = db.prepare(`
+                UPDATE images
+                SET link = ?
+                WHERE car_license_plate = ? AND idx = 0
+            `);
+            updateImage.run(imagePath, licensePlate);
+        } else {
+            // Insere nova imagem principal
+            const insertImage = db.prepare(`
+                INSERT INTO images (car_license_plate, link, idx)
+                VALUES (?, ?, 0)
+            `);
+            insertImage.run(licensePlate, imagePath);
+        }
+
+        res.json({
+            message: 'Images uploaded successfully',
+            files: req.files.map(f => f.filename)
+        });
+    } catch (error) {
+        console.error("Erro ao salvar imagem:", error.message);
+        res.status(500).json({ error: error.message });
     }
-
-    insertImage.finalize();
-  
-    res.json({ message: 'Images uploaded successfully', files: req.files.map(f => f.filename) });
 });
 
 // Get images for a car
@@ -81,8 +79,8 @@ router.get('/images/:license_plate', (req, res) => {
         }
     );
 });
-
 //#endregion
+
 //#region Car Data stuff
 router.post('/upload', (req, res) => {
     let {
@@ -102,7 +100,7 @@ router.post('/upload', (req, res) => {
     if (!license_plate || !price) {
         return res.status(400).json({ error: "license_plate and price are required" });
     }
-    
+
     const query = `
         INSERT INTO cars (
             license_plate,
@@ -121,7 +119,7 @@ router.post('/upload', (req, res) => {
 
     db.run(query, [
         license_plate,
-        name || null,               
+        name || null,
         year || null,
         chassis || null,
         registration_number || null,
@@ -208,19 +206,15 @@ router.post('/update', (req, res) => {
         license_plate
     ];
 
-    console.log("a rodar!");
-
-    db.run(query, values, function(err) {
+    db.run(query, values, function (err) {
         if (err) {
             console.error("Erro ao atualizar:", err.message);
             return res.status(500).json({ error: err.message });
         }
 
-        console.log("rodou");
         return res.status(200).json({ message: "Dados Atualizados!" });
     });
 });
-
 
 router.get('/retrieve', (req, res) => {
     const {
@@ -233,7 +227,6 @@ router.get('/retrieve', (req, res) => {
         status
     } = req.query;
 
-    //Kinda of a stoopid way to not condition the WHERE
     let query = "SELECT * FROM cars WHERE 1=1";
     const params = [];
 
@@ -268,7 +261,7 @@ router.get('/retrieve', (req, res) => {
 
     db.all(query, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-        
+
         const carsWithParsedData = rows.map(car => {
             try {
                 return {
@@ -305,6 +298,5 @@ router.get("/car_name/:license_plate", (req, res) => {
         return res.status(200).json({ name: row.name });
     });
 });
-
 
 module.exports = router;
