@@ -33,8 +33,8 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
     const licensePlate = req.body.license_plate;
   
     const checkExistingImage = db.prepare(`
-        Select * FROM images WHERE car_license_plate = ${req.body.license_plate}
-    `).get();
+        Select * FROM images WHERE car_license_plate = ?
+    `).get(licensePlate);
 
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
