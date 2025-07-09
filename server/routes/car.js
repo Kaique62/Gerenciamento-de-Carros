@@ -22,51 +22,49 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/images/upload', upload.array('images', 10), async (req, res) => {
-    const licensePlate = req.body.license_plate;
+    /*
+        Todo: carrosel de imagens,
+        Imagem entra com index e link,
+        index 0 = imagem principal,
+        index > 0 = imagens adicionais,
+        possibilidade de exclusão de imagem, via idx e car_plate
+    */
 
-    console.log(licensePlate)
+    const licensePlate = req.body.license_plate;
+  
+    const checkExistingImage = db.prepare(`
+        Select * FROM images WHERE car_license_plate = ${req.body.license_plate}
+    `).get();
 
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
     }
-
+  
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    try {
-        const existingImage = db.prepare(`
-            SELECT * FROM images WHERE car_license_plate = ?
-        `).get(licensePlate);
+    let insertImage;
+    const imagePath = "/api/data/images/" + req.files[0].filename;
 
-        const imagePath = `/api/data/images/${req.files[0].filename}`;
-        console.log(imagePath);
-
-        if (existingImage) {
-            // Atualiza imagem principal existente
-            const updateImage = db.prepare(`
-                UPDATE images
-                SET link = ?
-                WHERE car_license_plate = ? AND idx = 0
-            `);
-            updateImage.run(imagePath, licensePlate);
-        } else {
-            // Insere nova imagem principal
-            const insertImage = db.prepare(`
-                INSERT INTO images (car_license_plate, link, idx)
-                VALUES (?, ?, 0)
-            `);
-            insertImage.run(licensePlate, imagePath);
-        }
-
-        res.json({
-            message: 'Images uploaded successfully',
-            files: req.files.map(f => f.filename)
-        });
-    } catch (error) {
-        console.error("Erro ao salvar imagem:", error.message);
-        res.status(500).json({ error: error.message });
+    if (checkExistingImage.length == 0) {
+        insertImage = db.prepare(`
+            UPDATE images
+            SET link = ?
+            WHERE car_license_plate = ?
+        `);
+        insertImage.run(`/api/data/images/${req.files[0].filename}`, licensePlate);
+    } else {
+        insertImage = db.prepare(`
+            INSERT INTO images (car_license_plate, link, idx)
+            VALUES (?, ?, ?)
+        `);
+        insertImage.run(req.body.license_plate, `/api/data/images/${req.files[0].filename}`, 0);
     }
+
+    insertImage.finalize();
+  
+    res.json({ message: 'Images uploaded successfully', files: req.files.map(f => f.filename) });
 });
 
 // Get images for a car
@@ -82,8 +80,8 @@ router.get('/images/:license_plate', (req, res) => {
         }
     );
 });
-//#endregion
 
+//#endregion
 //#region Car Data stuff
 router.post('/upload', (req, res) => {
     let {
@@ -103,7 +101,7 @@ router.post('/upload', (req, res) => {
     if (!license_plate || !price) {
         return res.status(400).json({ error: "license_plate and price are required" });
     }
-
+    
     const query = `
         INSERT INTO cars (
             license_plate,
@@ -122,7 +120,7 @@ router.post('/upload', (req, res) => {
 
     db.run(query, [
         license_plate,
-        name || null,
+        name || null,               
         year || null,
         chassis || null,
         registration_number || null,
@@ -174,7 +172,7 @@ router.post('/update', (req, res) => {
 
     if (
         !name || !license_plate || !year || !chassis || !registration_number ||
-        !ownership_document || !mileage || !price ||
+        !ownership_document || !mileage || !description || !price ||
         !ipva_tax_years || !status
     ) {
         return res.status(400).json({ error: "alguns campos estão faltando!" });
@@ -204,20 +202,24 @@ router.post('/update', (req, res) => {
         mileage,
         description,
         price,
-        JSON.stringify(ipva_tax_years),
+        ipva_tax_years ? JSON.stringify(ipva_tax_years) : '[]',
         status,
-        license_plate
+        license_plate // usado no WHERE
     ];
 
-    db.run(query, values, function (err) {
+    console.log("a rodar!");
+
+    db.run(query, values, function(err) {
         if (err) {
             console.error("Erro ao atualizar:", err.message);
             return res.status(500).json({ error: err.message });
         }
 
+        console.log("rodou");
         return res.status(200).json({ message: "Dados Atualizados!" });
     });
 });
+
 
 router.get('/retrieve', (req, res) => {
     const {
@@ -226,10 +228,10 @@ router.get('/retrieve', (req, res) => {
         chassis,
         registration_number,
         priceMin,
-        priceMax,
-        status
+        priceMax
     } = req.query;
 
+    //Kinda of a stoopid way to not condition the WHERE
     let query = "SELECT * FROM cars WHERE 1=1";
     const params = [];
 
@@ -257,14 +259,10 @@ router.get('/retrieve', (req, res) => {
         query += " AND price <= ?";
         params.push(priceMax);
     }
-    if (status) {
-        query += " AND status = ?";
-        params.push(status);
-    }
 
     db.all(query, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-
+        
         const carsWithParsedData = rows.map(car => {
             try {
                 return {
@@ -280,25 +278,6 @@ router.get('/retrieve', (req, res) => {
         });
 
         res.json(carsWithParsedData);
-    });
-});
-
-router.get("/car_name/:license_plate", (req, res) => {
-    const licensePlate = req.params.license_plate;
-
-    const query = `SELECT name FROM cars WHERE license_plate = ?`;
-
-    db.get(query, [licensePlate], (err, row) => {
-        if (err) {
-            console.error("Erro ao buscar nome do carro:", err.message);
-            return res.status(500).json({ error: err.message });
-        }
-
-        if (!row) {
-            return res.status(404).json({ error: "Carro não encontrado." });
-        }
-
-        return res.status(200).json({ name: row.name });
     });
 });
 
