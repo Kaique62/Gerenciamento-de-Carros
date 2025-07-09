@@ -55,8 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/cars/images/${licensePlate}`);
             const data = await response.json();
-            return data.error ? [] : data;
-        } catch {
+            console.log(data)
+            if (data.error) {
+                console.error(`Error fetching images for ${licensePlate}:`, data.error);
+                return [];
+            }
+            
+            return data;
+        } catch (error) {
+            console.error(`Failed to fetch images for ${licensePlate}:`, error);
             return [];
         }
     }
@@ -81,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sells.map(async (sell) => {
                 const name = await fetchCarName(sell.car_license_plate);
                 const images = await fetchCarImages(sell.car_license_plate);
-                const imagePath = images.length > 0
-                    ? images[0].image_path
+                const imagePath = images.length >= 0
+                    ? images[0].link
                     : `//placehold.co/600x400/000/FFF?text=${encodeURIComponent(name)}`;
                 return { ...sell, name, imagePath };
             })
