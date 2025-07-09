@@ -55,15 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/cars/images/${licensePlate}`);
             const data = await response.json();
-            
-            if (data.error) {
-                console.error(`Error fetching images for ${licensePlate}:`, data.error);
-                return [];
-            }
-            
-            return data;
-        } catch (error) {
-            console.error(`Failed to fetch images for ${licensePlate}:`, error);
+            return data.error ? [] : data;
+        } catch {
             return [];
         }
     }
