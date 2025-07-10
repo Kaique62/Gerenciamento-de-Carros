@@ -220,6 +220,20 @@ router.post('/update', (req, res) => {
     });
 });
 
+router.get('/remove/:plate', (req, res) => {
+    let plate = req.params.plate;
+    console.log(plate)
+
+    let query = "DELETE FROM cars WHERE license_plate = ?"
+
+    db.get(query, plate, (err) => {
+        if (err) {
+            console.error("Erro ao remover veículo: ", err.messages);
+            return res.status(500).json({error: err.message});
+        }
+        return res.status(200).json({message: "Veículo Removido com sucesso!"})
+    })
+})
 
 router.get('/retrieve', (req, res) => {
     const {

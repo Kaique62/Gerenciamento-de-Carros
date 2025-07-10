@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const editByPlateButton = document.getElementById('edit-by-plate-button');
     const plateSearchInput = document.getElementById('plate-search');
     
+    const removeConfirm = document.getElementById("removeConfirm");
+    removeConfirm.onclick = removeCar;
+
     // State
     let cars = [];
     let filteredCars = [];
@@ -84,6 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Failed to add car:', error);
             return { error: 'Failed to add car' };
+        }
+    }
+
+    async function removeCar(){
+        let excluirTextField = document.getElementById("ExcluirInput");
+        let plate = document.getElementById("add-license_plate").value;
+
+        if (excluirTextField.value == "Excluir"){
+            await fetch(API_URL + "/remove/" + plate);
+            alert("Veículo removido com sucesso!")
+            await renderCarCards();
+            closeModal(addModal);
+        }
+        else {
+            alert("Digite 'Excluir' para confirmar a exclusão!")
         }
     }
 
