@@ -1,7 +1,18 @@
 
 /* TODO: Consultas de placas digitais, já puxa o modelo e o ano do carro 
 ex da Api: https://www.npmjs.com/package/sinesp-api 
+
+Essencial para entrega do projeto: 
+* Entrada, custo, saida e lucro
+* Sistema de Login (Não sei como sera realizado em relação ao cadastro, se os usuários ja serao pre-cadastrados ou realmente tera a opção de cadastrar) || ( Alta prioridade)
+* Poderia ser feito um sistema onde o daniel autoriza o cadastro de um usuário (Prioridade média).
+* Histórico de Mudança, deve conter todas as mudanças realizadas no estoque para auxilio de controle de movimentação e alterações de carros (Alta prioridade).
+* Algum tipo de cyber segurança simples, não precisa ser muito aprofundada, apenas para evitar algum tipo de sql inject como já foi testado antes (Baixa Prioridade).
+* Possível tela de financias onde mostra os carros sendo financiados, mostrando os valores das parcelas com uma checklist de qual ja foi paga (Média prioridade).
+* Sistema de Backup do banco de dados (Essencial para evitar dores de cabeça no suporte tecnico) || (Alta Prioridade)
+* Prazo de Entrega (24/07/2025)
 */
+
 
 // a unica coisa estranha é vc
 document.addEventListener('DOMContentLoaded', () => {
