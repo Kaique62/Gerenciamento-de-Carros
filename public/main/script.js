@@ -13,9 +13,16 @@ Essencial para entrega do projeto:
 * Prazo de Entrega (24/07/2025)
 */
 
-
-// a unica coisa estranha é vc
+// a unica coisa estranha é vc  
 document.addEventListener('DOMContentLoaded', () => {
+
+    const user = localStorage.getItem("user");
+    console.log(user);
+
+    if (user == null){
+        window.location.href = "/login"
+    }
+
     // API Endpoints (replace with your actual endpoints)
     const API_URL = '/api/cars';
     const API_URL_SELL = '/api/sales';

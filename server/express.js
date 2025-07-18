@@ -29,6 +29,10 @@ app.use('/api/cars', carsRoutes);
 const salesRoutes = require('./routes/sales.js');
 app.use('/api/sales', salesRoutes);
 
+// Login routes
+const loginRoutes = require('./routes/login.js');
+app.use('/api/login', loginRoutes);
+
 // Start server
 app.listen(port, '0.0.0.0', () => {
     console.log("Server running on port: " + port);

@@ -1,31 +1,15 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const users = [
-        {
-            id: 1,
-            name: 'Daniel',
-            avatarUrl: 'https://cloudfront-us-east-1.images.arcpublishing.com/estadao/77XTHHCCLBEXLC2Y5RK4PN37CE.jpg'
-        },
-        {
-            id: 2,
-            name: 'Camila',
-            avatarUrl: 'https://placehold.co/200x200/9B2C2C/FFFFFF?text=C'
-        },
-        {
-            id: 3,
-            name: 'Jorge',
-            avatarUrl: 'https://placehold.co/200x200/2C5282/FFFFFF?text=J'
-        },
-        {
-            id: 4,
-            name: 'Visitante',
-            avatarUrl: 'https://placehold.co/200x200/276749/FFFFFF?text=V'
-        },
-        {
-            id: 5,
-            name: 'Visitante',
-            avatarUrl: 'https://placehold.co/200x200/326487/FFFFFF?text=V'
-        }
-    ];
+document.addEventListener('DOMContentLoaded', async () => {
+
+    logged = localStorage.getItem("user");
+    if (logged) {
+        window.location.href = "/"
+    }
+
+    const user_data = await fetch('/api/login/users');
+    response = await user_data.json();
+    console.log(response.users)
+
+    const users = response.users;
 
     // Elementos
     const profileSelectionView = document.getElementById('profile-selection-view');
@@ -88,10 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password-input').value;
         const user = users.find(u => u.id == userId);
 
-        // Simulação de verificação de login
-        console.log(`Tentativa de login para ${user.name} (ID: ${userId}) com a senha: ${password}`);
-        alert(`Autenticando como ${user.name}...`);
-        // Aqui você adicionaria sua lógica de autenticação real.
+        if (password == user.password){
+            localStorage.setItem("user", userId);
+            window.location.href = "/"
+        } else {
+            console.log("senha incoreta!");
+        }
     });
 
     // --- INICIALIZAÇÃO ---

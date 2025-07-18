@@ -47,6 +47,16 @@ db.serialize(() => {
             payment_method TEXT NOT NULL,
             FOREIGN KEY (car_license_plate) REFERENCES cars(license_plate) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          password TEXT NOT NULL,
+          acc_type INT NOT NULL,
+          avatarUrl TEXT
+        );
+
+        INSERT INTO users (name, acc_type, password) values ('Daniel', 1, 'adm2025')
     `);
 });
 
