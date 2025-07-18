@@ -1,5 +1,12 @@
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const user = localStorage.getItem("user");
+
+    if (user == null){
+        window.location.href = "/login"
+    }
+    
     // --- Sidebar Toggle ---
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;

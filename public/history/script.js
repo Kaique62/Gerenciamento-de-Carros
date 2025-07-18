@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    const user = localStorage.getItem("user");
+
+    if (user == null){
+        window.location.href = "/login"
+    }
+
     const API_URL = '/api/sales';
     const searchInput = document.getElementById("search-input");
     const filterSelect = document.getElementById("filter-select");

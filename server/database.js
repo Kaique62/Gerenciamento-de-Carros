@@ -56,7 +56,7 @@ db.serialize(() => {
           avatarUrl TEXT
         );
 
-        INSERT INTO users (name, acc_type, password) values ('Daniel', 1, 'adm2025')
+        INSERT INTO users (name, acc_type, password, avatarUrl) values ('Daniel', 1, 'adm2025', 'https://viagem.cnnbrasil.com.br/wp-content/uploads/sites/5/2022/05/origem-do-hambuguer-cnn4.jpg?w=1200&h=900&crop=1')
     `);
 });
 

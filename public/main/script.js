@@ -17,7 +17,6 @@ Essencial para entrega do projeto:
 document.addEventListener('DOMContentLoaded', () => {
 
     const user = localStorage.getItem("user");
-    console.log(user);
 
     if (user == null){
         window.location.href = "/login"
