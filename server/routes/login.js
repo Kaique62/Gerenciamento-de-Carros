@@ -7,7 +7,8 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = path.join(__dirname, '../uploads/avatars');
+        const dir = path.join(__dirname, '../../data/avatar');
+        console.log(dir)
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
     },
@@ -42,7 +43,7 @@ router.post('/users', async (req, res) => {
         if (err) return res.status(500).json({ error: "Erro ao verificar usuário." });
         if (existingUser) return res.status(400).json({ error: "Nome de usuário já existe." });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = password;
         const query = "INSERT INTO users (name, password, acc_type) VALUES (?, ?, ?)";
         db.run(query, [name, hashedPassword, acc_type], function (err) {
             if (err) return res.status(500).json({ error: "Erro ao registrar usuário." });
@@ -87,7 +88,7 @@ router.patch('/users/:id/avatar', upload.single('avatar'), (req, res) => {
 
     if (!file) return res.status(400).json({ error: "Nenhuma imagem enviada." });
 
-    const avatarUrl = `/uploads/avatars/${file.filename}`;
+    const avatarUrl = `/api/data/avatar/${file.filename}`;
     const query = "UPDATE users SET avatarUrl = ? WHERE id = ?";
     db.run(query, [avatarUrl, userId], function (err) {
         if (err) return res.status(500).json({ error: "Erro ao atualizar avatar." });

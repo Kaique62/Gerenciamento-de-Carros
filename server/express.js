@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use("/api/data", express.static(path.join(__dirname, '../data')));
 app.use("/api/data/images", express.static(path.join(__dirname, '../data/images')));
+app.use("/api/data/avatar", express.static(path.join(__dirname, '../data/avatar')));
 app.use("/api/data/pfp", express.static(path.join(__dirname, '../data/pfp')));
 
 // Pages Routes
