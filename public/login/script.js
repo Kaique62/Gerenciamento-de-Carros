@@ -1,13 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    logged = localStorage.getItem("user");
+    const logged = localStorage.getItem("user");
     if (logged) {
-        window.location.href = "/"
+        window.location.href = "/";
+        return;
     }
 
+    // Busca os usuários (sem senha, só id, name, avatarUrl)
     const user_data = await fetch('/api/login/users');
-    response = await user_data.json();
-    console.log(response.users)
+    const response = await user_data.json();
+    console.log(response.users);
 
     const users = response.users;
 
@@ -20,40 +22,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderProfiles() {
         profilesGrid.innerHTML = users.map(user => `
-                    <button class="profile-card group text-center space-y-3 focus:outline-none" data-user-id="${user.id}">
-                        <img src="${user.avatarUrl}" alt="${user.name}" class="w-32 h-32 rounded-lg mx-auto border-4 border-transparent group-hover:group-hover:scale-110 transition">
-                        <span class="text-xl text-gray-400 group-hover:text-white transition">${user.name}</span>
-                    </button>
-                `).join('');
+            <button class="profile-card group text-center space-y-3 focus:outline-none" data-user-id="${user.id}">
+                <img src="${user.avatarUrl}" alt="${user.name}" class="w-32 h-32 rounded-lg mx-auto border-4 border-transparent group-hover:scale-110 transition">
+                <span class="text-xl text-gray-400 group-hover:text-white transition">${user.name}</span>
+            </button>
+        `).join('');
     }
 
     function showPasswordView(userId) {
         const user = users.find(u => u.id == userId);
         if (!user) return;
 
-        // Preenche os dados do perfil selecionado
+        // Preenche dados do perfil
         document.getElementById('selected-profile-img').src = user.avatarUrl;
         document.getElementById('selected-profile-name').innerText = user.name;
 
-        // Armazena o ID do usuário no formulário para uso posterior
         loginForm.dataset.userId = user.id;
 
-        // Alterna a visibilidade das telas
         profileSelectionView.classList.add('hidden');
         passwordEntryView.classList.remove('hidden');
 
-        // Foca no campo de senha
         document.getElementById('password-input').focus();
     }
 
-    //Alterna de volta para a visualização de seleção de perfil.
     function showProfileSelectionView() {
         passwordEntryView.classList.add('hidden');
         profileSelectionView.classList.remove('hidden');
-        loginForm.reset(); // Limpa o campo de senha
+        loginForm.reset();
     }
 
-    //cliques nos perfis
     profilesGrid.addEventListener('click', (event) => {
         const profileCard = event.target.closest('.profile-card');
         if (profileCard) {
@@ -62,24 +59,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    //botão "Voltar"
     backButton.addEventListener('click', showProfileSelectionView);
 
-    //submissão do formulário
-    loginForm.addEventListener('submit', (event) => {
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
         const userId = event.target.dataset.userId;
         const password = document.getElementById('password-input').value;
-        const user = users.find(u => u.id == userId);
 
-        if (password == user.password){
-            localStorage.setItem("user", userId);
-            window.location.href = "/"
-        } else {
-            console.log("senha incoreta!");
+        if (!password) {
+            alert("Digite a senha");
+            return;
+        }
+        console.log(userId, password)
+        try {
+            const res = await fetch('/api/login/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: userId, password: password})
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem("user", userId);
+                window.location.href = "/";
+            } else {
+                alert(data.message || "Senha incorreta");
+            }
+        } catch (error) {
+            console.error("Erro no login:", error);
+            alert("Erro ao tentar fazer login");
         }
     });
 
-    // --- INICIALIZAÇÃO ---
+    // Inicializa
     renderProfiles();
 });
