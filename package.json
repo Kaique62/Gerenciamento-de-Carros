@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
+    "dayjs": "^1.11.13",
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
     "multer": "^2.0.1",

@@ -55,6 +55,7 @@ db.serialize(() => {
           acc_type INT NOT NULL,
           avatarUrl TEXT
         );
+        
     `);
 });
 
