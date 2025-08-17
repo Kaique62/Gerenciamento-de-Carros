@@ -46,19 +46,20 @@ router.post('/sales/add', (req, res) => {
 
 // filtro uau
 router.get('/sales/:license_plate', (req, res) => {
-    const licensePlate = req.params.license_plate;
+  const licensePlate = req.params.license_plate;
 
-    const query = `
-        SELECT * FROM sales_history
-        WHERE car_license_plate LIKE ?
-        ORDER BY date DESC
-    `;
+  const query = `
+    SELECT * FROM sales_history
+    WHERE car_license_plate = ?
+    ORDER BY date DESC
+  `;
 
-    db.all(query, [`%${licensePlate}%`], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
-    });
+  db.all(query, [licensePlate], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
+
 
 
 // Consulta filtrada por data

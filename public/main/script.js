@@ -178,6 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function fetchSells(plate) {
+        try {
+            const response = await fetch(`/api/sales/sales/${plate}`);
+            const data = await response.json();
+
+            if (data.error) {
+                console.error('Error fetching sells:', data.error);
+                return [];
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch sells:', error);
+            return [];
+        }
+    }
+
     // Render Functions
    async function createCarCard(car) {
         let mainImage;
@@ -190,40 +207,107 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const isSold = car.status === 'sold';
-        return `
-        <div id="card-${car.license_plate}" class="relative bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 flex flex-col">
-            ${isSold ? `<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-10">
-                <span class="text-white text-3xl font-bold border-4 p-4 transform -rotate-12">VENDIDO</span>
-            </div>` : ''}
-            <img src="${mainImage}" 
-                 alt="${car.name}" 
-                 class="w-full h-48 object-cover">
-            <div class="p-5 flex flex-col flex-grow">
-                <div class="flex-grow">
-                    <h3 class="text-xl font-bold text-gray-800 truncate" title="${car.name}">${car.name}</h3>
-                    <p class="text-sm text-gray-500 mb-3">${car.year}</p>
-                    <p class="text-3xl font-bold text-green-600 mb-4">${formatPrice(car.price)}</p>
-                    <div class="flex justify-between items-center text-sm text-gray-700">
-                        <span>Placa:</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono font-semibold bg-gray-200 px-2 py-1 rounded">${car.license_plate}</span>
-                            <button data-copy-text="${car.license_plate}" 
-                                    title="Copiar Placa" 
-                                    class="js-copy-button text-gray-500 hover:text-blue-600">
-                                <i class="bi bi-clipboard"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6 pt-4 border-t">
-                    <button data-plate="${car.license_plate}" 
-                            class="js-details-button w-full inline-flex items-center justify-center text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors ${isSold ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}" 
-                            ${isSold ? 'disabled' : ''}>
-                        <i class="bi bi-search mr-2"></i> Ver Detalhes
-                    </button>
-                </div>
-            </div>
-        </div>`;
+
+        var isProfit = false;
+        var borderColor;
+        var profitTextColor;
+        var saleData;
+        var profitPercentage;
+
+        if (isSold) {
+            console.log(car.license_plate)
+            saleData = await fetchSells(car.license_plate);
+            saleData = saleData[0];
+
+            isProfit = (saleData.sale_value - car.price) >= 0;
+            borderColor = isProfit ? "border-green-500" : "border-red-500";
+            profitTextColor = isProfit ? "text-green-600" : "text-red-600";
+           
+            profitPercentage = ((saleData.sale_value - car.price) / car.price) * 100;
+        }
+
+return `
+  <div 
+    id="card-${car.license_plate}" 
+    class="relative flex flex-col bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105"
+  >
+    ${isSold ? `
+      <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 text-center px-4">
+        <span class="text-white text-3xl font-bold border-4 px-6 py-3 transform -rotate-12">
+          VENDIDO
+        </span>
+        <p class="mt-3">
+          <span class="inline-block px-3 py-1 rounded-md text-white font-bold
+            ${isProfit ? 'bg-green-600' : 'bg-red-600'}">
+            ${isProfit ? "Lucro" : "Prejuízo"}: R$ ${(saleData.sale_value - car.price).toLocaleString('pt-BR')}
+          </span>
+        </p>
+        <p class="mt-2">
+          <span class="inline-block px-3 py-1 rounded-md font-bold
+            ${isProfit ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+            ${profitPercentage.toFixed(2)}%
+          </span>
+        </p>
+      </div>
+    ` : ''}
+
+    <figure>
+      <img 
+        src="${mainImage}" 
+        alt="Imagem do carro ${car.name}" 
+        class="w-full h-48 object-cover"
+        loading="lazy"
+      >
+    </figure>
+
+    <div class="flex flex-col flex-grow p-5">
+      <header class="flex-grow">
+        <h3 
+          class="text-xl font-bold text-gray-800 truncate" 
+          title="${car.name}"
+        >
+          ${car.name}
+        </h3>
+        <p class="text-sm text-gray-500 mb-3">${car.year}</p>
+        <p class="text-3xl font-bold text-green-600 mb-4">
+          ${formatPrice(car.price)}
+        </p>
+      </header>
+
+      <div class="flex justify-between items-center text-sm text-gray-700">
+        <span>Placa:</span>
+        <div class="flex items-center gap-2">
+          <span class="font-mono font-semibold bg-gray-200 px-2 py-1 rounded">
+            ${car.license_plate}
+          </span>
+          <button 
+            type="button"
+            data-copy-text="${car.license_plate}" 
+            title="Copiar placa ${car.license_plate}" 
+            aria-label="Copiar placa ${car.license_plate}" 
+            class="js-copy-button text-gray-500 hover:text-blue-600 transition-colors"
+          >
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t">
+        <button 
+          type="button"
+          data-plate="${car.license_plate}" 
+          class="js-details-button w-full inline-flex items-center justify-center text-white font-medium rounded-lg text-sm px-5 py-2.5 transition-colors 
+                 ${isSold ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400'}" 
+          ${isSold ? 'disabled aria-disabled="true"' : ''}
+        >
+          <i class="bi bi-search mr-2"></i>
+          Ver Detalhes
+        </button>
+      </div>
+    </div>
+  </div>
+`;
+
     }
 
     async function renderCarCards() {

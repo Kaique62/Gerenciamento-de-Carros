@@ -314,4 +314,23 @@ router.get("/car_name/:license_plate", (req, res) => {
     });
 });
 
+router.get("/price/:license_plate", (req, res) => {
+    const licensePlate = req.params.license_plate;
+
+    const query = `SELECT price FROM cars WHERE license_plate = ?`;
+
+    db.get(query, [licensePlate], (err, row) => {
+        if (err) {
+            console.error("Erro ao buscar nome do carro:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (!row) {
+            return res.status(404).json({ error: "Carro não encontrado." });
+        }
+
+        return res.status(200).json(row);
+    });
+});
+
 module.exports = router;
