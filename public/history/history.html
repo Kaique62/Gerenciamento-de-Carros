@@ -107,6 +107,18 @@
     </div>
     <script src="../dashboard.js"></script>
     <script src="/history/script.js"></script>
+    <script>
+        function showPlate(viewPlateBtnId, licensePlate) {
+            const container = document.getElementById(viewPlateBtnId);
+            if (container) {
+                if (container.innerHTML != "Ver Placa") {
+                    container.innerHTML = "Ver Placa";
+                }
+                else {
+                    container.innerHTML = licensePlate;
+                }
+            }
+        }
+    </script>
 </body>
-
 </html>

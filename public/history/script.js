@@ -140,33 +140,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createSellCard(sell) {
-        console.log(sell.profitPercentage);
         const isProfit = sell.profitPercentage >= 0;
         const borderColor = isProfit ? "border-green-500" : "border-red-500";
-        const profitTextColor = isProfit ? "text-green-600" : "text-red-600";
+        const profitBgColor = isProfit ? "bg-green-100" : "bg-red-100";
+        const profitTextColor = isProfit ? "text-green-700" : "text-red-700";
+        const profitLabel = isProfit ? "Lucro" : "Prejuízo";
+
+        const saleValueFormatted = sell.sale_value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const profitValue = sell.sale_value - sell.price;
+        const profitValueFormatted = Math.abs(profitValue).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        const plateContainerId = `plate-container-${sell.car_license_plate}`;
+        const viewPlateBtnId = `view-plate-btn-${sell.car_license_plate}`;
 
         sellGrid.innerHTML += `
             <div id="sell-${sell.car_license_plate}"
-                class="flex flex-col sm:flex-row bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 w-full h-auto border-l-8 ${borderColor}">
-                <img src="${sell.imagePath}" alt="${sell.name}"
-                    class="w-full h-40 sm:w-40 sm:h-auto object-cover">
-                <div class="p-4 flex flex-col justify-between flex-grow">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-gray-800 truncate" title="${sell.name}">${sell.name}</h3>
-                            <span class="text-sm text-gray-500">${sell.car_license_plate}</span>
-                        </div>
+                class="flex flex-col bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 w-full border-l-8 ${borderColor}">
 
-                        <p class="text-sm text-gray-500">R$ ${sell.sale_value.toLocaleString('pt-BR')}</p>
-                        <div class="text-sm text-gray-700 mt-2">
-                            <p><span class="font-semibold">Data:</span> ${new Date(sell.date).toLocaleDateString()}</p>
-                            <p><span class="font-semibold">Método:</span> ${sell.payment_method}</p>
-                            <p class="font-semibold ${profitTextColor} mt-2">
-                             ${isProfit ? "Lucro" : "Prejuízo"} de : R$:${sell.sale_value -  sell.price}
-                            </p>
-                            <p class="font-semibold ${profitTextColor} mt-2">
-                                    ${sell.profitPercentage.toFixed(2)}%
-                            </p>
+                <!-- Seção da Imagem -->
+                <img src="${sell.imagePath}" alt="${sell.name}" class="w-full h-48 object-cover">
+
+                <!-- Seção de Conteúdo Principal -->
+                <div class="p-5 flex flex-col flex-grow">
+                    <!-- Nome do Carro e Valor da Venda -->
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 truncate mb-2 sm:mb-0" title="${sell.name}">
+                            ${sell.name}
+                        </h3>
+                        <p class="text-xl font-light text-gray-600 shrink-0 sm:ml-4">
+                            ${saleValueFormatted}
+                        </p>
+                    </div>
+
+                    <!-- Seção de Lucro/Prejuízo -->
+                    <div class="rounded-lg p-3 text-center mb-4 ${profitBgColor} ${profitTextColor}">
+                        <p class="text-sm font-semibold">${profitLabel}</p>
+                        <p class="text-2xl font-bold">${profitValueFormatted}</p>
+                        <p class="text-sm font-semibold">(${sell.profitPercentage.toFixed(2)}%)</p>
+                    </div>
+
+                    <!-- Detalhes Adicionais (Data, Método e Placa) -->
+                    <div class="mt-auto text-sm text-gray-600">
+                        <div class="flex justify-between items-center py-2 border-t">
+                            <span class="font-semibold">Data da Venda:</span>
+                            <span>${new Date(sell.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-t">
+                            <span class="font-semibold">Método:</span>
+                            <span>${sell.payment_method}</span>
+                        </div>
+                        <div id="${plateContainerId}" class="flex justify-between items-center py-2 border-t">
+                            <span class="font-semibold">Placa:</span>
+                            <button id="${viewPlateBtnId}" onclick="showPlate('${viewPlateBtnId}', '${sell.car_license_plate}')"
+                                    class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-bold hover:bg-gray-300 transition-colors">
+                                Ver Placa
+                            </button>
                         </div>
                     </div>
                 </div>
