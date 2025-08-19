@@ -34,6 +34,11 @@ app.use('/api/sales', salesRoutes);
 const loginRoutes = require('./routes/login.js');
 app.use('/api/login', loginRoutes);
 
+// Analytics routes
+const analyticsRoutes = require('./routes/analytics.js');
+app.use('/api/analytics', analyticsRoutes);
+
+
 // Start server
 app.listen(port, '0.0.0.0', () => {
     console.log("Server running on port: " + port);
