@@ -88,7 +88,7 @@
                             <option value="">Todos os Status</option>
                             <option value="available">Disponíveis</option>
                             <option value="sold">Vendidos</option>
-                         <!-- Apenas durante a fase de prototipagem!  <option value="maintenance">Em Manutenção</option> -->
+                            <!-- Apenas durante a fase de prototipagem!  <option value="maintenance">Em Manutenção</option> -->
                         </select>
                     </div>
 
@@ -133,8 +133,7 @@
                 </div>
                 <!-- Body -->
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <img id="details-modal-image" src="" alt="Imagem do Veículo"
-                        class="w-full h-auto rounded-lg object-cover shadow-md">
+                    <div id="my-carousel-container" class="w-full max-w-xl mx-auto"></div>
                     <div class="space-y-4">
                         <div>
                             <h4 class="text-lg font-bold text-gray-800">Preço</h4>
@@ -170,7 +169,8 @@
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto">
                     <!-- Coluna de Imagens -->
-                    <div class="flex flex-col gap-6">
+                    <div class="flex flex-col gap-1">
+                        <!-- Container para a imagem principal -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700">Imagem Principal *</label>
                             <label
@@ -181,30 +181,43 @@
                                 <span class="mainImageIcon text-6xl text-gray-400 font-light">+</span>
                             </label>
                         </div>
-                        
+
+                        <!-- Container para as imagens adicionais -->
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais <strong id="extraIamgeCouter">0/5</strong></label>
-                            
+                            <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais <strong
+                                    id="extraIamgeCouter">0/5</strong></label>
+
                             <!-- Container onde as pré-visualizações e o botão de upload serão renderizados -->
-                            <div id="additional-image-container" class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-2">
-                                
+                            <div id="additional-image-container"
+                                class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-2">
+
                                 <!-- O botão de upload inicial será controlado pelo JavaScript -->
-                                <label class="relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-300 transition-colors">
-                                    <input type="file" id="additional-images-input" accept="image/*" multiple class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                                    <span class="text-4xl text-gray-400 font-light"><i class="bi bi-plus-circle"></i></span>
+                                <label
+                                    class="relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-300 transition-colors">
+                                    <input type="file" id="additional-images-input" accept="image/*" multiple
+                                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                                    <span class="text-4xl text-gray-400 font-light"><i
+                                            class="bi bi-plus-circle"></i></span>
                                 </label>
-                                
+
                             </div>
                         </div>
 
+                        <!-- Div para exclusão do carro -->
                         <div id="delete-car-div"
-                            class="hidden flex flex-col gap-2 bg-red-400 p- rounded-lg border border-red-500 mt-5">
-                            <label class="block mb-2 text font-medium text-black-700">Excluir Carro</label>
+                            class="flex flex-col gap-2 rounded-lg bg-red-500 p-3 mt-5 border border-red-700">
+
+                            <label class="block text-lg font-semibold text-white">Excluir Carro Permanentemente</label>
+
                             <input placeholder="Escreva 'Excluir' para excluir"
-                                class="w-full rounded-lg px-4 py-2 bg-red-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" id="ExcluirInput"/>
+                                class="w-full rounded-lg px-4 py-2 bg-red-50 border border-red-200 text-red-900 placeholder-red-400 focus:outline-none focus:ring-2 focus:ring-white"
+                                id="ExcluirInput" />
+
                             <button type="button"
-                                class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors" id="removeConfirm">Confirmar
-                                Exclusão</button>
+                                class="px-4 py-2 rounded-lg bg-red-800 text-white font-semibold hover:bg-black hover:bg-opacity-20 transition-all focus:outline-none focus:ring-2 focus:ring-white"
+                                id="removeConfirm">
+                                Confirmar Exclusão
+                            </button>
                         </div>
                     </div>
                     <!-- Coluna de Campos -->

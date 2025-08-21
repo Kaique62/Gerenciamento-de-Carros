@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // O DataTransfer é a forma correta de gerenciar uma lista de arquivos que pode ser modificada
     let fileStore = new DataTransfer();
+    let isEditing = false;
 
     // State
     let cars = [];
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function addCar(carData) {
 
-//user_data
+        //user_data
         
         try {
             console.log("fetch try")
@@ -443,8 +444,8 @@ return `
         }
 
         detailsModal.querySelector('#details-modal-title').textContent = car.name;
-        detailsModal.querySelector('#details-modal-image').src = mainImage;
         detailsModal.querySelector('#details-modal-price').textContent = formatPrice(car.price);
+        createCarousel("my-carousel-container", images.map(img => img.link));
 
         const specsContainer = detailsModal.querySelector('#details-modal-specs');
         specsContainer.innerHTML = `
@@ -480,6 +481,8 @@ return `
     }
 
     async function populateAndShowEditModal(plate) {
+        isEditing = true;
+        
         const carToEdit = cars.find(c => c.license_plate === plate);
 
         if (!carToEdit) {
@@ -509,17 +512,55 @@ return `
         // Disable license plate editing
         //form.querySelector('[name="license_plate"]').disabled = true; não pode estar necessáriamente desabilitada, caso ele erre a placa nao teria como mudar
 
-        let mainImage = await fetchCarImages(plate);
+        const images = await fetchCarImages(plate);
 
-        if (mainImage.length > 0){
+        if (images.length > 0){
             const mainImagePreview = form.querySelector('.mainImagePreview');
             const mainImageIcon = form.querySelector('.mainImageIcon');
             if (mainImagePreview && mainImageIcon) {
-                mainImagePreview.src = mainImage[0].link;
+                mainImagePreview.src = images[0].link;
                 mainImagePreview.classList.remove('hidden');
                 mainImageIcon.classList.add('hidden');
             }
         }
+        
+        if (images.length > 1) {
+            imageContainer.innerHTML = '';
+            let imageCounter = 0;
+
+            images.forEach((imageObj, index) => {
+                if (index == 0) {
+                    return;
+                }
+
+                const previewWrapper = document.createElement('div');
+                previewWrapper.className = "relative aspect-square rounded-xl overflow-hidden";
+
+                previewWrapper.innerHTML = `
+                    <img src="${imageObj.link}" alt="Pré-visualização da imagem ${index + 1}" class="w-full h-full object-cover">
+                    <button type="button" data-index="${index}" class="js-remove-image absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold hover:bg-red-500 transition-colors">
+                        &times;
+                    </button>
+                `;
+
+                imageCounter += 1;
+                document.querySelector('#extraIamgeCouter').textContent = `${imageCounter}/${5}`;
+                imageContainer.appendChild(previewWrapper);
+
+                if (images.length < MAX_IMAGES) {
+                    const uploadButton = document.createElement('label');
+                    uploadButton.className = "relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500";
+                    uploadButton.innerHTML = `
+                        <input type="file" accept="image/*" multiple class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                        <span class="text-4xl text-gray-400 font-light"><i class="bi bi-plus-circle"></i></span>
+                    `;
+
+                    uploadButton.querySelector('input').addEventListener('change', handleFileSelection);
+                    imageContainer.appendChild(uploadButton);
+                }
+            });
+        }
+
         // show delete button
         const deleteButtonDiv = modal.querySelector('#delete-car-div');
         if (deleteButtonDiv) {
@@ -727,7 +768,7 @@ return `
     // Image handling functions
     function renderPreviews() {
         // Limpa o container, mas mantém o input de arquivo (que estará dentro do botão '+')
-        imageContainer.innerHTML = '';
+        if (!isEditing) { imageContainer.innerHTML = ''; }
 
         // Cria e adiciona um card de pré-visualização para cada arquivo
         Array.from(fileStore.files).forEach((file, index) => {
@@ -777,7 +818,7 @@ return `
         }
         
         // Limpa o valor do input para permitir selecionar os mesmos arquivos novamente se forem removidos
-        event.target.value = ''; 
+        event.target.value = '';
         renderPreviews();
     }
 
@@ -803,6 +844,79 @@ return `
         fileStore = new DataTransfer();
         imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
         renderPreviews();
+    }
+
+    function createCarousel(containerId, images) {
+        const container = document.getElementById(containerId);
+        if (!container || images.length === 0) return;
+
+        // HTML base do carrossel
+        container.innerHTML = `
+        <div class="relative w-full h-64">
+            <div class="overflow-hidden rounded-lg shadow-md w-full h-full">
+            <img id="${containerId}-image" src="" alt="Imagem do Veículo" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Bolinhas (dots) -->
+            <div id="${containerId}-dots" class="flex justify-center mt-2 gap-2"></div>
+
+            <!-- Botão anterior -->
+            <button id="${containerId}-prev" class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80">
+            &#10094;
+            </button>
+
+            <!-- Botão próximo -->
+            <button id="${containerId}-next" class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80">
+            &#10095;
+            </button>
+        </div>
+        `;
+
+        let currentIndex = 0;
+
+        const carouselImage = document.getElementById(`${containerId}-image`);
+        const indicator = document.getElementById(`${containerId}-indicator`);
+        const dotsContainer = document.getElementById(`${containerId}-dots`);
+        const prevBtn = document.getElementById(`${containerId}-prev`);
+        const nextBtn = document.getElementById(`${containerId}-next`);
+
+        // Cria bolinhas
+        images.forEach((_, idx) => {
+        const dot = document.createElement("span");
+        dot.classList.add("w-3", "h-3", "bg-gray-400", "rounded-full", "cursor-pointer");
+        dot.addEventListener("click", () => {
+            currentIndex = idx;
+            updateCarousel();
+        });
+        dotsContainer.appendChild(dot);
+        });
+
+        const dots = dotsContainer.children;
+
+        function updateDots(index) {
+        Array.from(dots).forEach((dot, idx) => {
+            dot.classList.toggle("bg-gray-800", idx === index);
+            dot.classList.toggle("bg-gray-400", idx !== index);
+        });
+        }
+
+        function updateCarousel() {
+        carouselImage.src = images[currentIndex];
+        updateDots(currentIndex);
+        }
+
+        prevBtn.addEventListener("click", () => {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        updateCarousel();
+        });
+
+        nextBtn.addEventListener("click", () => {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateCarousel();
+        });
+
+        // Inicializa
+        updateCarousel();
     }
 
     // Initialize Event Listeners
@@ -848,4 +962,5 @@ return `
 
     // Start the app
     initApp();
+
 });
