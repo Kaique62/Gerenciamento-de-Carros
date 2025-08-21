@@ -55,11 +55,23 @@ db.serialize(() => {
           acc_type INT NOT NULL,
           avatarUrl TEXT
         );
-        
+
+        CREATE TABLE IF NOT EXISTS changes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            author_name TEXT NOT NULL,
+            author_avatar TEXT,
+            date_time TEXT NOT NULL,
+            tagText,
+            tagColor TEXT,
+            vehicle_plate TEXT NOT NULL,
+            vehicle_name TEXT,
+            changes TEXT
+        );
     `);
 });
 
 
-//         INSERT INTO users (name, acc_type, password, avatarUrl) values ('Daniel', 1, 'adm2025', 'https://viagem.cnnbrasil.com.br/wp-content/uploads/sites/5/2022/05/origem-do-hambuguer-cnn4.jpg?w=1200&h=900&crop=1')
+//         
 
 module.exports = db;

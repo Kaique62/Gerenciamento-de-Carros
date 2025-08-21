@@ -1,3 +1,16 @@
+const user = localStorage.getItem("user");
+
+(async () => {
+    let user_data = await fetch('/api/login/users/' + user);
+    user_data = await user_data.json();
+    user_data = user_data.users[0];
+    
+    if (user == null && user_data == null){
+        localStorage.removeItem("user");
+        window.location.href = "/login"
+    }
+})
+
 function createHistoryCard({
     type, // "edit" ou "create"
     authorName,
@@ -91,6 +104,28 @@ container.innerHTML += createHistoryCard({
         { label: "Quilometragem", oldValue: "25.000 KM", newValue: "25.124 KM" }
     ]
 });
+
+async function renderCreateCards() {
+    const response = await fetch("/api/cars/changes/retireve/add");
+    const data = await response.json();
+
+    for (i = 0; i < data.length; i++){
+        container.innerHTML += createHistoryCard(
+            {
+                type: data[i].type,
+                authorName: data[i].author_name,
+                authorAvatar: data[i].author_avatar,
+                dateTime: data[i].date_time,
+                tagColor: data[i].tagColor,
+                tagText: data[i].tagText,
+                vehiclePlate: data[i].vehicle_plate,
+                vehicleName: data[i].vehicle_name
+            }
+        )
+    }
+}
+
+renderCreateCards();
 
 // Card de criação
 container.innerHTML += createHistoryCard({

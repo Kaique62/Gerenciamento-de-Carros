@@ -7,6 +7,20 @@ const monthFilter = document.getElementById('filter-month');
 const yearFilter = document.getElementById('filter-year');
 const downloadBtn = document.getElementById('download-pdf');
 
+
+const user = localStorage.getItem("user");
+
+(async () => {
+    let user_data = await fetch('/api/login/users/' + user);
+    user_data = await user_data.json();
+    user_data = user_data.users[0];
+    
+    if (user == null && user_data == null){
+        localStorage.removeItem("user");
+        window.location.href = "/login"
+    }
+})
+
 async function updateChart() {
     const month = monthFilter.value;
     const year = yearFilter.value;

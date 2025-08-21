@@ -14,11 +14,16 @@ Essencial para entrega do projeto:
 */
 
 // a unica coisa estranha é vc  
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
     const user = localStorage.getItem("user");
 
-    if (user == null){
+    let user_data = await fetch('/api/login/users/' + user);
+    user_data = await user_data.json();
+    user_data = user_data.users[0];
+
+    if (user == null && user_data == null){
+        localStorage.removeItem("user");
         window.location.href = "/login"
     }
 
@@ -91,7 +96,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addCar(carData) {
+
+//user_data
+        
         try {
+            console.log("fetch try")
+            await fetch(`${API_URL}/changes/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                        type: "create",
+                        author: user_data.name,
+                        authorAvatar: user_data.avatarUrl,
+                        dateTime: new Date().getTime(),
+                        tagText: "Criação de Veículo",
+                        tagColor: "green",
+                        vehiclePlate: carData.license_plate,
+                        vehicleName: carData.name
+                    }
+                )
+            })
+
+
             const response = await fetch(`${API_URL}/upload`, {
                 method: 'POST',
                 headers: {

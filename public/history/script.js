@@ -1,3 +1,16 @@
+const user = localStorage.getItem("user");
+
+(async () => {
+    let user_data = await fetch('/api/login/users/' + user);
+    user_data = await user_data.json();
+    user_data = user_data.users[0];
+    
+    if (user == null && user_data == null){
+        localStorage.removeItem("user");
+        window.location.href = "/login"
+    }
+})
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const user = localStorage.getItem("user");

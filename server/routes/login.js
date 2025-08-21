@@ -31,6 +31,16 @@ router.get('/users', (req, res) => {
     });
 });
 
+
+router.get('/users/:id', (req, res) => {
+    const id = req.params.id;
+    const query = "SELECT id, name, acc_type, avatarUrl FROM users WHERE id = ?";
+    db.all(query, [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Erro ao buscar usuários." });
+        return res.status(200).json({ users: rows });
+    });
+});
+
 // ==============================
 // POST /api/users
 // Cria um novo usuário

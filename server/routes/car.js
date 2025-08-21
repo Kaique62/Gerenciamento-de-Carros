@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const multer = require('multer');
 const path = require('path');
+const { triggerAsyncId } = require('async_hooks');
 
 //#region IMAGE STUFF
 const storage = multer.diskStorage({
@@ -330,6 +331,45 @@ router.get("/price/:license_plate", (req, res) => {
         }
 
         return res.status(200).json(row);
+    });
+});
+
+router.post("/changes/add", (req, res) => {
+    const { type, author, authorAvatar, dateTime, tagText, tagColor, vehiclePlate, vehicleName } = req.body;
+
+    console.log("Body recebido:", req.body);
+
+    if (!type) {
+        return res.status(400).json({ error: "O campo 'type' é obrigatório" });
+    }
+
+    const query = `INSERT INTO changes 
+        (type, author_name, author_avatar, date_time, tagText, tagColor, vehicle_plate, vehicle_name) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(query, [type, author, authorAvatar, dateTime, tagText, tagColor, vehiclePlate, vehicleName], function(err) {
+        if (err) {
+            console.error("Erro ao inserir:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        return res.status(200).json("success");
+    });
+});
+
+router.get("/changes/retireve/add", (req, res) => {
+    const query = "SELECT * FROM changes WHERE type = 'create'";
+
+    db.all(query, (err, rows) => {
+        if (err) {
+            console.error("Erro ao buscar alterações:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: "alterações não encontradas." });
+        }
+
+        return res.status(200).json(rows); // retorna todos os registros
     });
 });
 
