@@ -23,49 +23,52 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/images/upload', upload.array('images', 10), async (req, res) => {
-    /*
-        Todo: carrosel de imagens,
-        Imagem entra com index e link,
-        index 0 = imagem principal,
-        index > 0 = imagens adicionais,
-        possibilidade de exclusão de imagem, via idx e car_plate
-    */
-
     const licensePlate = req.body.license_plate;
-  
-    const checkExistingImage = db.prepare(`
-        Select * FROM images WHERE car_license_plate = ?
-    `).get(licensePlate);
 
     if (!licensePlate) {
         return res.status(400).json({ error: 'license_plate is required in body' });
     }
-  
+
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    let insertImage;
-    const imagePath = "/api/data/images/" + req.files[0].filename;
+    // pega todas imagens já cadastradas desse carro
+    const existingImages = db.prepare(`
+        SELECT * FROM images WHERE car_license_plate = ?
+    `).all(licensePlate);
 
-    if (checkExistingImage.length == 0) {
-        insertImage = db.prepare(`
-            UPDATE images
-            SET link = ?
-            WHERE car_license_plate = ?
-        `);
-        insertImage.run(`/api/data/images/${req.files[0].filename}`, licensePlate);
-    } else {
-        insertImage = db.prepare(`
-            INSERT INTO images (car_license_plate, link, idx)
-            VALUES (?, ?, ?)
-        `);
-        insertImage.run(req.body.license_plate, `/api/data/images/${req.files[0].filename}`, 0);
+    // prepara statements
+    const insertImage = db.prepare(`
+        INSERT INTO images (car_license_plate, link, idx)
+        VALUES (?, ?, ?)
+    `);
+
+    const updateImage = db.prepare(`
+        UPDATE images
+        SET link = ?
+        WHERE car_license_plate = ? AND idx = 0
+    `);
+
+    // se não tem imagem principal (idx 0), a primeira enviada vira principal
+    if (existingImages.length === 0) {
+        const firstFile = req.files[0];
+        updateImage.run(`/api/data/images/${firstFile.filename}`, licensePlate);
     }
 
-    insertImage.finalize();
-  
-    res.json({ message: 'Images uploaded successfully', files: req.files.map(f => f.filename) });
+    // insere todas as imagens com índice
+    req.files.forEach((file, idx) => {
+        insertImage.run(
+            licensePlate,
+            `/api/data/images/${file.filename}`,
+            idx
+        );
+    });
+
+    res.json({
+        message: 'Images uploaded successfully',
+        files: req.files.map(f => f.filename)
+    });
 });
 
 // Get images for a car

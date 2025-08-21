@@ -181,19 +181,22 @@
                                 <span class="mainImageIcon text-6xl text-gray-400 font-light">+</span>
                             </label>
                         </div>
-                        <!--
+                        
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais</label>
-                            <div class="additionalImageContainer grid grid-cols-3 gap-2">
-                                <label
-                                    class="relative aspect-video bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500">
-                                    <input type="file" name="additionalImages" accept="image/*" multiple
-                                        class="absolute inset-0 opacity-0 cursor-pointer">
-                                    <span class="text-4xl text-gray-400 font-light">+</span>
+                            <label class="block mb-2 text-sm font-medium text-gray-700">Imagens Adicionais <strong id="extraIamgeCouter">0/5</strong></label>
+                            
+                            <!-- Container onde as pré-visualizações e o botão de upload serão renderizados -->
+                            <div id="additional-image-container" class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-2">
+                                
+                                <!-- O botão de upload inicial será controlado pelo JavaScript -->
+                                <label class="relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-300 transition-colors">
+                                    <input type="file" id="additional-images-input" accept="image/*" multiple class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                                    <span class="text-4xl text-gray-400 font-light"><i class="bi bi-plus-circle"></i></span>
                                 </label>
+                                
                             </div>
                         </div>
-                    -->
+
                         <div id="delete-car-div"
                             class="hidden flex flex-col gap-2 bg-red-400 p- rounded-lg border border-red-500 mt-5">
                             <label class="block mb-2 text font-medium text-black-700">Excluir Carro</label>

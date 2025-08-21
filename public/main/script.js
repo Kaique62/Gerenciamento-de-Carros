@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const API_URL = '/api/cars';
     const API_URL_SELL = '/api/sales';
     const IMAGE_UPLOAD_URL = '/api/cars/images/upload';
-    const CAR_STATUSES = ['available', 'sold', 'maintenance'];
 
     // DOM Elements
     const carGridContainer = document.getElementById('car-grid-container');
@@ -47,6 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const removeConfirm = document.getElementById("removeConfirm");
     removeConfirm.onclick = removeCar;
+
+    // --- CONFIGURAÇÕES E SELETORES ---
+    const MAX_IMAGES = 5;
+    const imageInput = document.getElementById('additional-images-input');
+    const imageContainer = document.getElementById('additional-image-container');
+    const imageCounter = document.getElementById('extraIamgeCouter');
+    
+    // O DataTransfer é a forma correta de gerenciar uma lista de arquivos que pode ser modificada
+    let fileStore = new DataTransfer();
 
     // State
     let cars = [];
@@ -398,6 +406,7 @@ return `
                 
                 if (modalElement.id === 'add-modal') {
                     // Reset image previews
+                    
                     const mainImagePreview = form.querySelector('.mainImagePreview');
                     const mainImageIcon = form.querySelector('.mainImageIcon');
                     if (mainImagePreview && mainImageIcon) {
@@ -405,6 +414,7 @@ return `
                         mainImagePreview.src = '';
                         mainImageIcon.classList.remove('hidden');
                     }
+                    removeAllAdditionalImages();
                 
                     
                     form.querySelector('h2').textContent = 'Adicionar Novo Veículo';
@@ -412,6 +422,7 @@ return `
                     if (licensePlateInput) {
                         licensePlateInput.disabled = false;
                     }
+
                     delete form.dataset.mode;
                     delete form.dataset.editingPlate;
                 }
@@ -548,6 +559,7 @@ return `
             
             // Handle images
             const mainImageFile = formData.get('mainImage');
+            const additionalImages = fileStore.files;
             
             // Add/update car
             let result;
@@ -567,6 +579,9 @@ return `
             if (mainImageFile.size > 0) {
                 const images = [];
                 if (mainImageFile.size > 0) images.push(mainImageFile);
+                for (const additionalImageFile of additionalImages) {
+                    images.push(additionalImageFile);
+                }
                 const uploadResult = await uploadCarImages(carData.license_plate, images);
                 if (uploadResult.error) {
                     console.error('Image upload error:', uploadResult.error);
@@ -709,12 +724,97 @@ return `
         }
     }
 
+    // Image handling functions
+    function renderPreviews() {
+        // Limpa o container, mas mantém o input de arquivo (que estará dentro do botão '+')
+        imageContainer.innerHTML = '';
+
+        // Cria e adiciona um card de pré-visualização para cada arquivo
+        Array.from(fileStore.files).forEach((file, index) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = "relative aspect-square rounded-xl overflow-hidden";
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewWrapper.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" data-index="${index}" class="js-remove-image absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold hover:bg-red-500 transition-colors">
+                        &times;
+                    </button>
+                `;
+            };
+            reader.readAsDataURL(file);
+            imageContainer.appendChild(previewWrapper);
+        });
+
+        // Adiciona o botão de upload se o limite não foi atingido
+        if (fileStore.files.length < MAX_IMAGES) {
+            const uploadButton = document.createElement('label');
+            uploadButton.className = "relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500";
+            uploadButton.innerHTML = `
+                <input type="file" accept="image/*" multiple class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                <span class="text-4xl text-gray-400 font-light"><i class="bi bi-plus-circle"></i></span>
+            `;
+            // Reatribui o listener ao novo input
+            uploadButton.querySelector('input').addEventListener('change', handleFileSelection);
+            imageContainer.appendChild(uploadButton);
+        }
+        
+        // Sincroniza a lista de arquivos do DataTransfer com o input original
+        imageInput.files = fileStore.files;
+    }
+
+    function handleFileSelection(event) {
+        const newFiles = Array.from(event.target.files);
+
+        for (const file of newFiles) {
+            if (fileStore.files.length < MAX_IMAGES) {
+                fileStore.items.add(file);
+                imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
+            } else {
+                break;
+            }
+        }
+        
+        // Limpa o valor do input para permitir selecionar os mesmos arquivos novamente se forem removidos
+        event.target.value = ''; 
+        renderPreviews();
+    }
+
+    function handleRemoveImage(event) {
+        const removeButton = event.target.closest('.js-remove-image');
+        if (removeButton) {
+            const indexToRemove = parseInt(removeButton.dataset.index, 10);
+            
+            // Cria um novo DataTransfer sem o arquivo removido
+            const newFileStore = new DataTransfer();
+            Array.from(fileStore.files)
+                .filter((_, i) => i !== indexToRemove)
+                .forEach(file => newFileStore.items.add(file));
+            
+            // Atualiza o fileStore global
+            fileStore = newFileStore;
+           imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
+            renderPreviews();
+        }
+    }
+
+    function removeAllAdditionalImages() {
+        fileStore = new DataTransfer();
+        imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
+        renderPreviews();
+    }
+
     // Initialize Event Listeners
     function initEventListeners() {
         // Form submissions
         addCarForm?.addEventListener('submit', handleAddFormSubmit);
         sellCarForm?.addEventListener('submit', handleSellFormSubmit);
         
+        // Extra Image input handling
+        imageContainer.addEventListener('change', handleFileSelection); 
+        imageContainer.addEventListener('click', handleRemoveImage);
+
         // Global click handler
         document.addEventListener('click', handleAppClick);
         
