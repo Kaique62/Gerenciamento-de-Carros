@@ -15,7 +15,6 @@ Essencial para entrega do projeto:
 
 // a unica coisa estranha é vc  
 document.addEventListener('DOMContentLoaded', async () => {
-
     const user = localStorage.getItem("user");
 
     let user_data = await fetch('/api/login/users/' + user);
@@ -109,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         //user_data
         
         try {
-            console.log("fetch try")
             await fetch(`${API_URL}/changes/add`, {
                 method: 'POST',
                 headers: {
@@ -144,11 +142,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function removeCar(){
+    async function removeCar(carData){
         let excluirTextField = document.getElementById("ExcluirInput");
         let plate = document.getElementById("add-license_plate").value;
 
         if (excluirTextField.value == "Excluir"){
+            await fetch(`${API_URL}/changes/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                        type: "removed",
+                        author: user_data.name,
+                        authorAvatar: user_data.avatarUrl,
+                        dateTime: new Date().getTime(),
+                        tagText: "Remoção de Veículo",
+                        tagColor: "red",
+                        vehiclePlate: document.getElementById("add-license_plate").value,
+                        vehicleName: document.getElementById("add-name").value
+                    }
+                )
+            })
+
             await fetch(API_URL + "/remove/" + plate);
             alert("Veículo removido com sucesso!")
             await renderCarCards();
@@ -180,23 +196,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function updateCar(licensePlate, carData) {
-        try {
-            carData.license_plate = licensePlate;
-            const response = await fetch(`${API_URL}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(carData)
-            });
+async function updateCar(licensePlate, newCarData) {
+    try {
+        const currentRes = await fetch(`${API_URL}/car/${licensePlate}`);
+        if (!currentRes.ok) throw new Error("Failed to fetch current car data");
+        const currentData = await currentRes.json();
 
-            return await response.json();
-        } catch (error) {
-            console.error('Failed to update car:', error);
-            return { error: 'Failed to update car' };
+        const changes = [];
+        for (const key in newCarData) {
+            if (Object.hasOwn(newCarData, key)) {
+                const oldValue = currentData[key];
+                const newValue = newCarData[key];
+
+                // Only log if values differ and the oldValue exists
+                if (oldValue !== undefined && oldValue !== newValue) {
+                    changes.push({
+                        label: key,
+                        oldValue: String(oldValue),
+                        newValue: String(newValue)
+                    });
+                }
+            }
         }
+
+        if (changes.length === 0) {
+            return { message: "Nenhuma alteração detectada" };
+        }
+
+        await fetch(`${API_URL}/changes/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: "edit",
+                author: user_data.name,
+                authorAvatar: user_data.avatarUrl,
+                dateTime: Date.now(),
+                tagText: "Edição de Veículo",
+                tagColor: "orange",
+                vehiclePlate: licensePlate,
+                vehicleName: newCarData.name || currentData.name,
+                changes
+            })
+        });
+
+        const updateRes = await fetch(`${API_URL}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...newCarData, license_plate: licensePlate })
+        });
+
+        return await updateRes.json();
+    } catch (err) {
+        console.error("Erro ao atualizar automaticamente:", err);
+        return { error: err.message };
     }
+}
+
 
     async function sellCar(saleData) {
         try {

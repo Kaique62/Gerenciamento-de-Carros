@@ -1,36 +1,24 @@
-const user = localStorage.getItem("user");
-
-(async () => {
-    let user_data = await fetch('/api/login/users/' + user);
-    user_data = await user_data.json();
-    user_data = user_data.users[0];
-    
-    if (user == null && user_data == null){
-        localStorage.removeItem("user");
-        window.location.href = "/login"
-    }
-})
-
 function createHistoryCard({
-    type, // "edit" ou "create"
+    type,
     authorName,
     authorAvatar,
     dateTime,
     tagText,
-    tagColor, // ex: "green" para adicionar, "red" para exclusao, "orange" ou "yelow" para edicao
+    tagColor,
     vehiclePlate,
     vehicleName = null,
     changes = []
 }) {
-    // Cabeçalho
-    let header = `
-        <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
+    const cardId = `history-card-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Cabeçalho clicável com data e placa
+    const header = `
+        <div class="bg-gray-800 text-white p-4 flex justify-between items-center cursor-pointer" onclick="toggleCardSmooth('${cardId}')">
             <div class="flex items-center gap-3">
-                <img src="${authorAvatar}" alt="Avatar de ${authorName}"
-                    class="w-10 h-10 rounded-full border-2 border-gray-600">
+                <img src="${authorAvatar}" alt="Avatar de ${authorName}" class="w-10 h-10 rounded-full border-2 border-gray-600">
                 <div>
                     <p class="font-bold">${authorName}</p>
-                    <p class="text-sm text-gray-400">${dateTime}</p>
+                    <p class="text-sm text-gray-300">${dateTime} • Placa: <span class="font-mono font-semibold">${vehiclePlate}</span></p>
                 </div>
             </div>
             <span class="bg-${tagColor}-500/20 text-${tagColor}-300 text-xs font-semibold px-2.5 py-1 rounded-full">
@@ -39,12 +27,10 @@ function createHistoryCard({
         </div>
     `;
 
-    // Corpo
-    let body = "";
-
+    // Corpo do card
+    let bodyContent = "";
     if (type === "edit") {
-        // Lista de alterações
-        let items = changes.map(change => `
+        const items = changes.map(change => `
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">${change.label}</p>
                 <div class="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-md">
@@ -55,42 +41,64 @@ function createHistoryCard({
             </div>
         `).join("");
 
-        body = `
-            <div class="p-6">
-                <p class="text-sm text-gray-500 mb-4">
-                    Alterações no veículo de placa <span class="font-mono font-bold text-gray-700">${vehiclePlate}</span>:
-                </p>
-                <div class="space-y-4">${items}</div>
-            </div>
+        bodyContent = `
+            <p class="text-sm text-gray-500 mb-4">
+                Alterações no veículo:
+            </p>
+            <div class="space-y-4">${items}</div>
         `;
     }
 
     if (type === "create") {
-        body = `
-            <div class="p-6">
-                <p class="text-gray-700">
-                    Novo veículo <span class="font-bold">${vehicleName}</span> (placa 
-                    <span class="font-mono font-bold">${vehiclePlate}</span>) foi adicionado ao estoque.
-                </p>
-            </div>
+        bodyContent = `
+            <p class="text-gray-700">
+                Novo veículo <span class="font-bold">${vehicleName}</span> foi adicionado ao estoque.
+            </p>
         `;
     }
 
-    // Monta o card
+    if (type === "removed") {
+        bodyContent = `
+            <p class="text-red-700 font-semibold">
+                O veículo <span class="font-bold">${vehicleName || ''}</span> (placa 
+                <span class="font-mono font-bold">${vehiclePlate}</span>) foi <span class="underline">removido</span> do estoque.
+            </p>
+        `;
+    }
+
+    // Corpo com inner-wrapper para scroll se necessário
+    const body = `
+        <div id="${cardId}" class="overflow-hidden transition-all duration-500 ease-in-out max-h-0">
+            <div class="p-6 max-h-60 overflow-y-auto">
+                ${bodyContent}
+            </div>
+        </div>
+    `;
+
     return `
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
             ${header}
             ${body}
         </div>
     `;
 }
 
+function toggleCardSmooth(cardId) {
+    const el = document.getElementById(cardId);
+    if (!el) return;
+
+    if (el.style.maxHeight && el.style.maxHeight !== "0px") {
+        el.style.maxHeight = "0px";
+    } else {
+        el.style.maxHeight = el.scrollHeight + "px";
+    }
+}
+
 // ======================
-// Exemplo de uso
+// Exemplo de uso e renderização dinâmica
 // ======================
 const container = document.getElementById("history-container");
 
-// Card de edição
 container.innerHTML += createHistoryCard({
     type: "edit",
     authorName: "Admin",
@@ -105,36 +113,62 @@ container.innerHTML += createHistoryCard({
     ]
 });
 
-async function renderCreateCards() {
-    const response = await fetch("/api/cars/changes/retireve/add");
-    const data = await response.json();
+async function renderHistoryCards() {
+    try {
+        const response = await fetch("/api/cars/changes/retrieve/all");
+        if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+        const data = await response.json();
+        const container = document.getElementById("history-container");
+        container.innerHTML = ""; // clear previous cards
 
-    for (i = 0; i < data.length; i++){
-        container.innerHTML += createHistoryCard(
-            {
-                type: data[i].type,
-                authorName: data[i].author_name,
-                authorAvatar: data[i].author_avatar,
-                dateTime: data[i].date_time,
-                tagColor: data[i].tagColor,
-                tagText: data[i].tagText,
-                vehiclePlate: data[i].vehicle_plate,
-                vehicleName: data[i].vehicle_name
+        data.forEach(item => {
+            let changes = [];
+            if (item.type === "edit" && item.changes) {
+                try {
+                    changes = item.changes;
+                } catch (err) {
+                    console.warn(`Failed to parse changes for vehicle ${item.vehicle_plate}:`, err);
+                    changes = [];
+                }
             }
-        )
+
+            const cardData = {
+                type: item.type,
+                authorName: item.author_name,
+                authorAvatar: item.author_avatar || "https://placehold.co/100x100/gray/FFFFFF?text=?",
+                dateTime: new Date(parseInt(item.date_time)).toLocaleString(),
+                tagText: item.tagText || 
+                         (item.type === "edit" ? "Edição de Veículo" : 
+                         item.type === "removed" ? "Remoção de Veículo" : "Criação de Veículo"),
+                tagColor: item.tagColor || 
+                          (item.type === "edit" ? "orange" : 
+                          item.type === "removed" ? "red" : "green"),
+                vehiclePlate: item.vehicle_plate,
+                vehicleName: item.vehicle_name
+            };
+
+            if (item.type === "edit") {
+                cardData.changes = changes;
+            }
+
+            container.innerHTML += createHistoryCard(cardData);
+        });
+
+    } catch (error) {
+        console.error("Error rendering history cards:", error);
     }
 }
 
-renderCreateCards();
+renderHistoryCards();
 
-// Card de criação
+// Exemplo de criação de card removido
 container.innerHTML += createHistoryCard({
-    type: "create",
-    authorName: "Camila",
-    authorAvatar: "https://placehold.co/100x100/9B2C2C/FFFFFF?text=C",
-    dateTime: "04 de Ago, 2024 - 09:15",
-    tagText: "Criação de Veículo",
-    tagColor: "green",
-    vehiclePlate: "RTY-4B56",
-    vehicleName: "Toyota Corolla XEi"
+    type: "removed",
+    authorName: "João",
+    authorAvatar: "https://placehold.co/100x100/FF0000/FFFFFF?text=J",
+    dateTime: "06 de Ago, 2024 - 10:00",
+    tagText: "Remoção de Veículo",
+    tagColor: "red",
+    vehiclePlate: "ABC-1234",
+    vehicleName: "Honda Civic"
 });

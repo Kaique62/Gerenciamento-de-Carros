@@ -318,6 +318,34 @@ router.get("/car_name/:license_plate", (req, res) => {
     });
 });
 
+// Get full car data by license plate
+router.get('/car/:license_plate', (req, res) => {
+    const licensePlate = req.params.license_plate;
+
+    const query = `SELECT * FROM cars WHERE license_plate = ?`;
+
+    db.get(query, [licensePlate], (err, row) => {
+        if (err) {
+            console.error("Erro ao buscar carro:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (!row) {
+            return res.status(404).json({ error: "Carro não encontrado." });
+        }
+
+        // Parse JSON fields like ipva_tax_years
+        try {
+            row.ipva_tax_years = row.ipva_tax_years ? JSON.parse(row.ipva_tax_years) : [];
+        } catch (e) {
+            row.ipva_tax_years = [];
+        }
+
+        return res.status(200).json(row);
+    });
+});
+
+
 router.get("/price/:license_plate", (req, res) => {
     const licensePlate = req.params.license_plate;
 
@@ -359,8 +387,54 @@ router.post("/changes/add", (req, res) => {
     });
 });
 
+router.post("/changes/update", (req, res) => {
+    const { type, author, authorAvatar, dateTime, tagText, tagColor, vehiclePlate, vehicleName, changes } = req.body;
+
+    console.log("Body recebido:", req.body);
+
+    if (!type || type !== "edit") {
+        return res.status(400).json({ error: "O campo 'type' deve ser 'edit'" });
+    }
+
+    if (!changes || !Array.isArray(changes) || changes.length === 0) {
+        return res.status(400).json({ error: "O campo 'changes' é obrigatório e deve conter pelo menos uma alteração" });
+    }
+
+    // Serialize changes array to JSON string
+    const changesJSON = JSON.stringify(changes);
+
+    const stmt = db.prepare(`
+        INSERT INTO changes
+        (type, author_name, author_avatar, date_time, tagText, tagColor, vehicle_plate, vehicle_name, changes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    stmt.run(
+        type,
+        author,
+        authorAvatar,
+        dateTime,
+        tagText,
+        tagColor,
+        vehiclePlate,
+        vehicleName,
+        changesJSON,
+        (err) => {
+            if (err) {
+                console.error("Erro ao inserir alterações:", err);
+                return res.status(500).json({ error: err.message });
+            }
+            return res.status(200).json({ message: "Alterações registradas com sucesso!" });
+        }
+    );
+
+    stmt.finalize();
+});
+
+
+
 router.get("/changes/retireve/add", (req, res) => {
-    const query = "SELECT * FROM changes WHERE type = 'create'";
+    const query = "SELECT * FROM changes";
 
     db.all(query, (err, rows) => {
         if (err) {
@@ -375,5 +449,55 @@ router.get("/changes/retireve/add", (req, res) => {
         return res.status(200).json(rows); // retorna todos os registros
     });
 });
+
+router.get("/changes/retrieve/all", (req, res) => {
+    const query = `
+        SELECT 
+            type, 
+            author_name, 
+            author_avatar, 
+            date_time, 
+            tagText, 
+            tagColor, 
+            vehicle_plate, 
+            vehicle_name,
+            changes
+        FROM changes
+        ORDER BY date_time DESC
+    `;
+
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            console.error("Erro ao buscar alterações:", err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        const formatted = rows.map(row => {
+            let parsedChanges = [];
+            if (row.type === "edit" && row.changes) {
+                try {
+                    parsedChanges = JSON.parse(row.changes);
+                } catch (err) {
+                    console.warn(`Falha ao parsear changes para veículo ${row.vehicle_plate}:`, err);
+                }
+            }
+
+            return {
+                type: row.type,
+                author_name: row.author_name,
+                author_avatar: row.author_avatar,
+                date_time: row.date_time,
+                tagText: row.tagText,
+                tagColor: row.tagColor || (row.type === "edit" ? "orange" : "green"),
+                vehicle_plate: row.vehicle_plate,
+                vehicle_name: row.vehicle_name,
+                changes: parsedChanges
+            };
+        });
+
+        res.json(formatted);
+    });
+});
+
 
 module.exports = router;
