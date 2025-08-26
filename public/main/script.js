@@ -104,9 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function addCar(carData) {
-
         //user_data
-        
         try {
             await fetch(`${API_URL}/changes/add`, {
                 method: 'POST',
@@ -125,7 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 )
             })
-
 
             const response = await fetch(`${API_URL}/upload`, {
                 method: 'POST',
@@ -196,62 +193,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-async function updateCar(licensePlate, newCarData) {
-    try {
-        const currentRes = await fetch(`${API_URL}/car/${licensePlate}`);
-        if (!currentRes.ok) throw new Error("Failed to fetch current car data");
-        const currentData = await currentRes.json();
+    async function updateCar(licensePlate, newCarData) {
+        try {
+            const currentRes = await fetch(`${API_URL}/car/${licensePlate}`);
+            if (!currentRes.ok) throw new Error("Failed to fetch current car data");
+            const currentData = await currentRes.json();
 
-        const changes = [];
-        for (const key in newCarData) {
-            if (Object.hasOwn(newCarData, key)) {
-                const oldValue = currentData[key];
-                const newValue = newCarData[key];
+            const changes = [];
+            for (const key in newCarData) {
+                if (Object.hasOwn(newCarData, key)) {
+                    const oldValue = currentData[key];
+                    const newValue = newCarData[key];
 
-                // Only log if values differ and the oldValue exists
-                if (oldValue !== undefined && oldValue !== newValue) {
-                    changes.push({
-                        label: key,
-                        oldValue: String(oldValue),
-                        newValue: String(newValue)
-                    });
+                    // Only log if values differ and the oldValue exists
+                    if (oldValue !== undefined && oldValue !== newValue) {
+                        changes.push({
+                            label: key,
+                            oldValue: String(oldValue),
+                            newValue: String(newValue)
+                        });
+                    }
                 }
             }
+
+            if (changes.length === 0) {
+                return { message: "Nenhuma alteração detectada" };
+            }
+
+            await fetch(`${API_URL}/changes/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: "edit",
+                    author: user_data.name,
+                    authorAvatar: user_data.avatarUrl,
+                    dateTime: Date.now(),
+                    tagText: "Edição de Veículo",
+                    tagColor: "orange",
+                    vehiclePlate: licensePlate,
+                    vehicleName: newCarData.name || currentData.name,
+                    changes
+                })
+            });
+
+            const updateRes = await fetch(`${API_URL}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...newCarData, license_plate: licensePlate })
+            });
+
+            return await updateRes.json();
+        } catch (err) {
+            console.error("Erro ao atualizar automaticamente:", err);
+            return { error: err.message };
         }
-
-        if (changes.length === 0) {
-            return { message: "Nenhuma alteração detectada" };
-        }
-
-        await fetch(`${API_URL}/changes/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: "edit",
-                author: user_data.name,
-                authorAvatar: user_data.avatarUrl,
-                dateTime: Date.now(),
-                tagText: "Edição de Veículo",
-                tagColor: "orange",
-                vehiclePlate: licensePlate,
-                vehicleName: newCarData.name || currentData.name,
-                changes
-            })
-        });
-
-        const updateRes = await fetch(`${API_URL}/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...newCarData, license_plate: licensePlate })
-        });
-
-        return await updateRes.json();
-    } catch (err) {
-        console.error("Erro ao atualizar automaticamente:", err);
-        return { error: err.message };
     }
-}
-
 
     async function sellCar(saleData) {
         try {
@@ -470,8 +466,6 @@ return `
                         mainImagePreview.src = '';
                         mainImageIcon.classList.remove('hidden');
                     }
-                    removeAllAdditionalImages();
-                
                     
                     form.querySelector('h2').textContent = 'Adicionar Novo Veículo';
                     const licensePlateInput = form.querySelector('[name="license_plate"]');
@@ -484,6 +478,7 @@ return `
                 }
             }
         }
+        isEditing = false;
     }
 
     async function populateAndShowDetailsModal(plate) {
@@ -536,8 +531,6 @@ return `
     }
 
     async function populateAndShowEditModal(plate) {
-        isEditing = true;
-        
         const carToEdit = cars.find(c => c.license_plate === plate);
 
         if (!carToEdit) {
@@ -568,6 +561,7 @@ return `
         //form.querySelector('[name="license_plate"]').disabled = true; não pode estar necessáriamente desabilitada, caso ele erre a placa nao teria como mudar
 
         const images = await fetchCarImages(plate);
+        fileStore = new DataTransfer(); // Reset file store
 
         if (images.length > 0){
             const mainImagePreview = form.querySelector('.mainImagePreview');
@@ -578,7 +572,7 @@ return `
                 mainImageIcon.classList.add('hidden');
             }
         }
-        
+
         if (images.length > 1) {
             imageContainer.innerHTML = '';
             let imageCounter = 0;
@@ -588,32 +582,18 @@ return `
                     return;
                 }
 
-                const previewWrapper = document.createElement('div');
-                previewWrapper.className = "relative aspect-square rounded-xl overflow-hidden";
-
-                previewWrapper.innerHTML = `
-                    <img src="${imageObj.link}" alt="Pré-visualização da imagem ${index + 1}" class="w-full h-full object-cover">
-                    <button type="button" data-index="${index}" class="js-remove-image absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold hover:bg-red-500 transition-colors">
-                        &times;
-                    </button>
-                `;
+                fetch(imageObj.link)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], `image_${imageObj.id}.png`, { type: blob.type });
+                        fileStore.items.add(file);
+                        renderPreviews();
+                    });
 
                 imageCounter += 1;
                 document.querySelector('#extraIamgeCouter').textContent = `${imageCounter}/${5}`;
-                imageContainer.appendChild(previewWrapper);
-
-                if (images.length < MAX_IMAGES) {
-                    const uploadButton = document.createElement('label');
-                    uploadButton.className = "relative aspect-square bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-500";
-                    uploadButton.innerHTML = `
-                        <input type="file" accept="image/*" multiple class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                        <span class="text-4xl text-gray-400 font-light"><i class="bi bi-plus-circle"></i></span>
-                    `;
-
-                    uploadButton.querySelector('input').addEventListener('change', handleFileSelection);
-                    imageContainer.appendChild(uploadButton);
-                }
             });
+            renderPreviews();
         }
 
         // show delete button
@@ -741,6 +721,7 @@ return `
     }
 
     function handleEditByPlateClick() {
+        isEditing = true;
         const plate = plateSearchInput.value.trim();
         
         if (!plate) {
@@ -765,6 +746,7 @@ return `
         // Open add modal
         else if (target.closest('#open-add-modal-button')) {
             openModal(addModal);
+            removeAllAdditionalImages();
             const deleteButtonDiv = addModal.querySelector('#delete-car-div');
             if (deleteButtonDiv) {
                 deleteButtonDiv.classList.add('hidden');
@@ -823,7 +805,7 @@ return `
     // Image handling functions
     function renderPreviews() {
         // Limpa o container, mas mantém o input de arquivo (que estará dentro do botão '+')
-        if (!isEditing) { imageContainer.innerHTML = ''; }
+        imageContainer.innerHTML = '';
 
         // Cria e adiciona um card de pré-visualização para cada arquivo
         Array.from(fileStore.files).forEach((file, index) => {
@@ -890,7 +872,7 @@ return `
             
             // Atualiza o fileStore global
             fileStore = newFileStore;
-           imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
+            imageCounter.textContent = `${fileStore.files.length}/${MAX_IMAGES}`;
             renderPreviews();
         }
     }
@@ -930,44 +912,43 @@ return `
         let currentIndex = 0;
 
         const carouselImage = document.getElementById(`${containerId}-image`);
-        const indicator = document.getElementById(`${containerId}-indicator`);
         const dotsContainer = document.getElementById(`${containerId}-dots`);
         const prevBtn = document.getElementById(`${containerId}-prev`);
         const nextBtn = document.getElementById(`${containerId}-next`);
 
         // Cria bolinhas
         images.forEach((_, idx) => {
-        const dot = document.createElement("span");
-        dot.classList.add("w-3", "h-3", "bg-gray-400", "rounded-full", "cursor-pointer");
-        dot.addEventListener("click", () => {
-            currentIndex = idx;
-            updateCarousel();
-        });
-        dotsContainer.appendChild(dot);
+            const dot = document.createElement("span");
+            dot.classList.add("w-3", "h-3", "bg-gray-400", "rounded-full", "cursor-pointer");
+            dot.addEventListener("click", () => {
+                currentIndex = idx;
+                updateCarousel();
+            });
+            dotsContainer.appendChild(dot);
         });
 
         const dots = dotsContainer.children;
 
         function updateDots(index) {
-        Array.from(dots).forEach((dot, idx) => {
-            dot.classList.toggle("bg-gray-800", idx === index);
-            dot.classList.toggle("bg-gray-400", idx !== index);
-        });
+            Array.from(dots).forEach((dot, idx) => {
+                dot.classList.toggle("bg-gray-800", idx === index);
+                dot.classList.toggle("bg-gray-400", idx !== index);
+            });
         }
 
         function updateCarousel() {
-        carouselImage.src = images[currentIndex];
-        updateDots(currentIndex);
+            carouselImage.src = images[currentIndex];
+            updateDots(currentIndex);
         }
 
         prevBtn.addEventListener("click", () => {
-        currentIndex = (currentIndex - 1 + images.length) % images.length;
-        updateCarousel();
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateCarousel();
         });
 
         nextBtn.addEventListener("click", () => {
-        currentIndex = (currentIndex + 1) % images.length;
-        updateCarousel();
+            currentIndex = (currentIndex + 1) % images.length;
+            updateCarousel();
         });
 
         // Inicializa
