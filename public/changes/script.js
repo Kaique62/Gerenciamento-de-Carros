@@ -127,7 +127,6 @@ async function renderHistoryCards() {
                 try {
                     changes = item.changes;
                 } catch (err) {
-                    console.warn(`Failed to parse changes for vehicle ${item.vehicle_plate}:`, err);
                     changes = [];
                 }
             }
@@ -155,7 +154,6 @@ async function renderHistoryCards() {
         });
 
     } catch (error) {
-        console.error("Error rendering history cards:", error);
     }
 }
 

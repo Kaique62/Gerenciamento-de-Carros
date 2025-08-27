@@ -75,13 +75,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json({status: 'available'});
             
             if (data.error) {
-                console.error('Error fetching cars:', data.error);
                 return [];
             }
             
             return data;
         } catch (error) {
-            console.error('Failed to fetch cars:', error);
+
             return [];
         }
     }
@@ -92,13 +91,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             
             if (data.error) {
-                console.error(`Error fetching images for ${licensePlate}:`, data.error);
                 return [];
             }
             
             return data;
         } catch (error) {
-            console.error(`Failed to fetch images for ${licensePlate}:`, error);
             return [];
         }
     }
@@ -134,7 +131,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             return await response.json();
         } catch (error) {
-            console.error('Failed to add car:', error);
             return { error: 'Failed to add car' };
         }
     }
@@ -188,7 +184,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             return await response.json();
         } catch (error) {
-            console.error('Failed to upload images:', error);
             return { error: 'Failed to upload images' };
         }
     }
@@ -244,7 +239,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             return await updateRes.json();
         } catch (err) {
-            console.error("Erro ao atualizar automaticamente:", err);
             return { error: err.message };
         }
     }
@@ -261,7 +255,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             return await response.json();
         } catch (error) {
-            console.error('Failed to sell car:', error);
             return { error: 'Failed to register sale' };
         }
     }
@@ -272,13 +265,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (data.error) {
-                console.error('Error fetching sells:', data.error);
                 return [];
             }
 
             return data;
         } catch (error) {
-            console.error('Failed to fetch sells:', error);
             return [];
         }
     }
@@ -303,7 +294,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         var profitPercentage;
 
         if (isSold) {
-            console.log(car.license_plate)
             saleData = await fetchSells(car.license_plate);
             saleData = saleData[0];
 
@@ -419,7 +409,6 @@ return `
             
             carGridContainer.innerHTML = cardsHTML;
         } catch (error) {
-            console.error('Error rendering car cards:', error);
             carGridContainer.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">Erro ao carregar veículos</div>';
         }
     }
@@ -659,9 +648,6 @@ return `
                     images.push(additionalImageFile);
                 }
                 const uploadResult = await uploadCarImages(carData.license_plate, images);
-                if (uploadResult.error) {
-                    console.error('Image upload error:', uploadResult.error);
-                }
             }
             
             // Refresh car list
@@ -671,7 +657,6 @@ return `
             // Show success message
             alert(`Veículo ${form.dataset.mode === 'edit' ? 'atualizado' : 'adicionado'} com sucesso!`);
         } catch (error) {
-            console.error('Form submission error:', error);
             alert(`Erro ao ${form.dataset.mode === 'edit' ? 'atualizar' : 'adicionar'} veículo: ${error.message}`);
         } finally {
             submitButton.innerHTML = originalButtonText;
@@ -698,7 +683,6 @@ return `
                 payment_method: form.querySelector('#payment_method').value,
             };
             
-            console.log('Sale Data:', saleData);
             // Register sale
             const result = await sellCar(saleData);
             //if (result.error) {
@@ -712,7 +696,6 @@ return `
             // Show success message
             alert('Venda registrada com sucesso!');
         } catch (error) {
-            console.error('Sale registration error:', error);
             alert(`Erro ao registrar venda: ${error.message}`);
         } finally {
             submitButton.innerHTML = originalButtonText;
@@ -773,7 +756,6 @@ return `
                         button.innerHTML = originalHTML;
                     }, 2000);
                 })
-                .catch(err => console.error('Failed to copy:', err));
         }
         // Image preview handling
         else if (target.closest('input[type="file"]')) {

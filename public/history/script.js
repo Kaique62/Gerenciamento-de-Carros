@@ -60,13 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.error) {
-                console.error('Error fetching sells:', data.error);
                 return [];
             }
 
             return data;
         } catch (error) {
-            console.error('Failed to fetch sells:', error);
             return [];
         }
     }
@@ -76,12 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`/api/cars/images/${licensePlate}`);
             const data = await response.json();
             if (data.error) {
-                console.error(`Error fetching images for ${licensePlate}:`, data.error);
                 return [];
             }
             return data;
         } catch (error) {
-            console.error(`Failed to fetch images for ${licensePlate}:`, error);
             return [];
         }
     }
@@ -118,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const name = await fetchCarName(sell.car_license_plate);
                 const images = await fetchCarImages(sell.car_license_plate);
                 const price = await fetchCarPrice(sell.car_license_plate); // 🟢 NEW
-                console.log(price)
 
                 // 🟢 calculate profit/loss
                 let profitPercentage = 0;
@@ -147,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         for (const sell of filtered) {
-            console.log(sell)
             createSellCard(sell);
         }
     }

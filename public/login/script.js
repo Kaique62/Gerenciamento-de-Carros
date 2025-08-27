@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Busca os usuários (sem senha, só id, name, avatarUrl)
     const user_data = await fetch('/api/login/users');
     const response = await user_data.json();
-    console.log(response.users);
 
     const users = response.users;
 
@@ -71,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Digite a senha");
             return;
         }
-        console.log(userId, password)
+
         try {
             const res = await fetch('/api/login/authenticate', {
                 method: 'POST',
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert(data.message || "Senha incorreta");
             }
         } catch (error) {
-            console.error("Erro no login:", error);
             alert("Erro ao tentar fazer login");
         }
     });

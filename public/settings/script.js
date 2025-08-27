@@ -31,7 +31,6 @@
         profilePreview.src = currentUser.avatarUrl;
       }
     } catch (error) {
-      console.error(error);
       alert("Erro ao carregar dados do usuário.");
     }
   }
@@ -41,9 +40,8 @@
       const res = await fetch("/api/login/users");
       if (!res.ok) throw new Error("Falha ao carregar usuários");
       const data = await res.json();
-      console.log("Usuários cadastrados:", data.users);
     } catch (err) {
-      console.error(err);
+      alert(err.message);
     }
   }
 
@@ -63,7 +61,6 @@
   }
 
   async function uploadAvatar(userId, file) {
-    console.log(file)
     if (!file) return null;
     const formData = new FormData();
     formData.append("avatar", file);
@@ -152,7 +149,6 @@
           }
         } catch (error) {
           alert(error.message);
-          console.error(error);
         } finally {
           saveButton.disabled = false;
           saveButton.textContent = "Salvar Alterações";
