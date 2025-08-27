@@ -1,4 +1,4 @@
-(() => {
+(async () => {
   let currentUser = {
     id: null,
     name: "",
@@ -13,11 +13,11 @@
   const newUsernameInput = document.getElementById("new-username");
   const newPasswordInput = document.getElementById("new-password");
   const registerUserBtn = userManagementSection?.querySelector("button");
-  const toastToggle = document.querySelector(".bg-gray-300[role='switch']");
-  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const userListContainer = document.getElementById("user-list");
 
   let selectedAvatarFile = null;
 
+  // Fetch current logged-in user
   async function fetchCurrentUser(userId) {
     try {
       const res = await fetch(`/api/login/users/${userId}`);
@@ -26,25 +26,39 @@
       currentUser.id = user.id;
       currentUser.name = user.name;
       currentUser.avatarUrl = user.avatarUrl;
+
       nameInput.value = currentUser.name;
       if (currentUser.avatarUrl) {
         profilePreview.src = currentUser.avatarUrl;
       }
     } catch (error) {
+      console.error(error);
       alert("Erro ao carregar dados do usuário.");
     }
   }
 
+  // Fetch all users
   async function fetchUsers() {
     try {
       const res = await fetch("/api/login/users");
       if (!res.ok) throw new Error("Falha ao carregar usuários");
       const data = await res.json();
+
+      // Populate user list div if it exists
+      if (userListContainer && data.users) {
+        userListContainer.innerHTML = data.users
+          .map(
+            (u) =>
+              `<li class="py-2 flex justify-between"><span>${u.name}</span><span class="text-xs text-gray-500">ID: ${u.id}</span></li>`
+          )
+          .join("");
+      }
     } catch (err) {
-      alert(err.message);
+      console.error(err);
     }
   }
 
+  // Handle profile image upload
   function handleProfileUpload(event) {
     const file = event.target.files[0];
     if (!file || !file.type.startsWith("image/")) {
@@ -60,6 +74,7 @@
     reader.readAsDataURL(file);
   }
 
+  // Upload avatar to server
   async function uploadAvatar(userId, file) {
     if (!file) return null;
     const formData = new FormData();
@@ -76,6 +91,7 @@
     return data.avatarUrl;
   }
 
+  // Register new user
   async function registerUser(name, password) {
     if (!name.trim() || !password.trim()) {
       alert("Nome de usuário e senha são obrigatórios.");
@@ -98,39 +114,7 @@
     return true;
   }
 
-  function applyDarkMode(enabled) {
-    if (enabled) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkModeEnabled", "true");
-      darkModeToggle.setAttribute("aria-checked", "true");
-      darkModeToggle.querySelector("span").classList.add("translate-x-6");
-      darkModeToggle.classList.remove("bg-gray-300");
-      darkModeToggle.classList.add("bg-blue-600");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkModeEnabled", "false");
-      darkModeToggle.setAttribute("aria-checked", "false");
-      darkModeToggle.querySelector("span").classList.remove("translate-x-6");
-      darkModeToggle.classList.add("bg-gray-300");
-      darkModeToggle.classList.remove("bg-blue-600");
-    }
-  }
-
-  function applyToastNotifications(enabled) {
-    toastToggle.setAttribute("aria-checked", enabled ? "true" : "false");
-    const thumb = toastToggle.querySelector("span");
-    if (enabled) {
-      thumb.classList.add("translate-x-6");
-      toastToggle.classList.remove("bg-gray-300");
-      toastToggle.classList.add("bg-blue-600");
-    } else {
-      thumb.classList.remove("translate-x-6");
-      toastToggle.classList.add("bg-gray-300");
-      toastToggle.classList.remove("bg-blue-600");
-    }
-    localStorage.setItem("toastNotificationsEnabled", enabled ? "true" : "false");
-  }
-
+  // Bind event listeners
   function bindEvents() {
     if (profileUpload) profileUpload.addEventListener("change", handleProfileUpload);
 
@@ -149,6 +133,7 @@
           }
         } catch (error) {
           alert(error.message);
+          console.error(error);
         } finally {
           saveButton.disabled = false;
           saveButton.textContent = "Salvar Alterações";
@@ -172,29 +157,9 @@
         }
       });
     }
-
-    if (darkModeToggle) {
-      darkModeToggle.addEventListener("click", () => {
-        const enabled = darkModeToggle.getAttribute("aria-checked") === "true";
-        applyDarkMode(!enabled);
-      });
-    }
-
-    if (toastToggle) {
-      toastToggle.addEventListener("click", () => {
-        const enabled = toastToggle.getAttribute("aria-checked") === "true";
-        applyToastNotifications(!enabled);
-      });
-    }
   }
 
-  function initializePreferences() {
-    const darkModeStored = localStorage.getItem("darkModeEnabled") === "true";
-    applyDarkMode(darkModeStored);
-    const toastStored = localStorage.getItem("toastNotificationsEnabled") === "true";
-    applyToastNotifications(toastStored);
-  }
-
+  // Initialize script
   async function init() {
     const userId = localStorage.getItem("user");
     if (!userId) {
@@ -205,7 +170,6 @@
     if (typeof canRegisterUsers !== "undefined" && canRegisterUsers) {
       userManagementSection?.classList.remove("hidden");
     }
-    initializePreferences();
     bindEvents();
     fetchUsers();
   }
