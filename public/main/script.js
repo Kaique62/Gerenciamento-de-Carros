@@ -170,23 +170,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function uploadCarImages(licensePlate, images) {
         try {
-            const formData = new FormData();
-            formData.append('license_plate', licensePlate);
-            
-            for (let i = 0; i < images.length; i++) {
-                formData.append('images', images[i]);
+            if (!images || images.length === 0) {
+                return { error: "No images provided" };
             }
-            
+
+            const formData = new FormData();
+            formData.append("license_plate", licensePlate);
+
+            images.forEach(img => formData.append("images", img));
+
             const response = await fetch(IMAGE_UPLOAD_URL, {
-                method: 'POST',
+                method: "POST",
                 body: formData
             });
-            
+
+            if (!response.ok) {
+                return { error: `Upload failed: ${response.status}` };
+            }
+
             return await response.json();
         } catch (error) {
-            return { error: 'Failed to upload images' };
+            console.error(error);
+            return { error: "Failed to upload images" };
         }
     }
+
 
     async function updateCar(licensePlate, newCarData) {
         try {

@@ -33,35 +33,24 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
         return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    // pega todas imagens já cadastradas desse carro
+    // fetch existing images for this car
     const existingImages = db.prepare(`
         SELECT * FROM images WHERE car_license_plate = ?
+        ORDER BY idx ASC
     `).all(licensePlate);
 
-    // prepara statements
     const insertImage = db.prepare(`
         INSERT INTO images (car_license_plate, link, idx)
         VALUES (?, ?, ?)
     `);
 
-    const updateImage = db.prepare(`
-        UPDATE images
-        SET link = ?
-        WHERE car_license_plate = ? AND idx = 0
-    `);
+    let nextIdx = existingImages.length; // continue indexing
 
-    // se não tem imagem principal (idx 0), a primeira enviada vira principal
-    if (existingImages.length === 0) {
-        const firstFile = req.files[0];
-        updateImage.run(`/api/data/images/${firstFile.filename}`, licensePlate);
-    }
-
-    // insere todas as imagens com índice
-    req.files.forEach((file, idx) => {
+    req.files.forEach((file, i) => {
         insertImage.run(
             licensePlate,
             `/api/data/images/${file.filename}`,
-            idx
+            nextIdx + i
         );
     });
 
@@ -70,6 +59,7 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
         files: req.files.map(f => f.filename)
     });
 });
+
 
 // Get images for a car
 router.get('/images/:license_plate', (req, res) => {
