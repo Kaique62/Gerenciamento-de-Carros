@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Busca os usuários (sem senha, só id, name, avatarUrl)
-    const user_data = await fetch('/api/login/users');
+    const user_data = await fetch('/api/main/login/main/users');
     const response = await user_data.json();
 
     const users = response.users;

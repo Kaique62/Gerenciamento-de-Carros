@@ -96,6 +96,15 @@ router.patch('/users/:id/avatar', upload.single('avatar'), (req, res) => {
     });
 });
 
+router.get('/main/users/:id', (req, res) => {
+    const id = req.params.id;
+    const query = "SELECT id, name, acc_type, avatarUrl FROM users WHERE id = ?";
+    db.all(query, [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Erro ao buscar usuários." });
+        return res.status(200).json({ users: rows });
+    });
+});
+
 // ==============================
 // GET /api/users/:id
 // Retorna dados de um usuário específico

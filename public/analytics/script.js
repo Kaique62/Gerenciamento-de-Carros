@@ -11,7 +11,7 @@ const downloadBtn = document.getElementById('download-pdf');
 const user = localStorage.getItem("user");
 
 (async () => {
-    let user_data = await fetch('/api/login/users/' + user);
+    let user_data = await fetch('/api/login/main/users/' + user);
     user_data = await user_data.json();
     user_data = user_data.users[0];
     
