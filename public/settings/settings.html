@@ -11,43 +11,53 @@
 <body class="bg-gray-100 font-sans">
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 flex flex-col bg-gray-800 text-gray-200 transition-all duration-300 ease-in-out shrink-0">
-      <div class="logo-container flex items-center px-4 h-20 border-b border-gray-700 shrink-0">
-        <i class="bi bi-car-front-fill"></i>
-        <span class="sidebar-text ml-3 text-xl font-bold">Gerenciamento de Veiculos</span>
-      </div>
+    <aside id="sidebar"
+            class="w-64 flex flex-col bg-gray-800 text-gray-200 transition-all duration-300 ease-in-out shrink-0">
+            <div class="logo-container flex items-center px-4 h-20 border-b border-gray-700 shrink-0">
+                <i class="bi bi-car-front-fill"></i>
+                <span class="sidebar-text ml-3 text-xl font-bold">Gerenciamento de Veiculos</span>
+            </div>
 
-      <nav class="flex-1 px-2 py-4 space-y-2">
-        <a href="../main/index.html" class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
-          <i class="bi bi-box-seam-fill"></i>
-          <span class="sidebar-text ml-4">Estoque</span>
-        </a>
-        <a href="../history/history.html" class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
-          <i class="bi bi-clock-history"></i>
-          <span class="sidebar-text ml-4">Historico</span>
-        </a>
-        <a href="../settings/settings.html" class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
-          <svg class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          <span class="sidebar-text ml-4">Configurações</span>
-        </a>
-      </nav>
+            <nav class="flex-1 px-2 py-4 space-y-2">
+                <a href="../main/index.html" id="nav-main"
+                    class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <i class="bi bi-box-seam-fill"></i>
+                    <span class="sidebar-text ml-4">Estoque</span>
+                </a>
+                <a href="../history/history.html" id="nav-history"
+                    class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <i class="bi bi-clock-history"></i>
+                    <span class="sidebar-text ml-4">Historico</span>
+                </a>
+                <a href="../analytics/analytics.html" id="nav-analytics"
+                    class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span class="sidebar-text ml-4">Relatórios</span>
+                </a>
+                <a href="../changes/changes.html" id="nav-analytics"
+                    class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span class="sidebar-text ml-4">Mudanças</span>
+                </a>
+                <a href="../settings/settings.html" id="nav-settings"
+                    class="nav-item flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <svg class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="sidebar-text ml-4">Configurações</span>
+                </a>
+            </nav>
 
-      <div class="p-2 border-t border-gray-700 space-y-2">
-        <button id="toggle-sidebar-btn" class="flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
-          <svg id="collapse-icon-svg" class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
-          <span class="sidebar-text ml-4">Recolher</span>
-        </button>
-        <!-- Logout Button -->
-        <button id="logout-btn" class="flex items-center w-full p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-          <i class="bi bi-box-arrow-right"></i>
-          <span class="ml-3">Sair</span>
-        </button>
-      </div>
+            <div class="p-2 border-t border-gray-700">
+                <button id="toggle-sidebar-btn" class="flex items-center w-full p-3 rounded-lg hover:bg-gray-700">
+                    <svg id="collapse-icon-svg" class="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
+                    <span class="sidebar-text ml-4">Recolher</span>
+                </button>
+            </div>
     </aside>
 
     <!-- Main Content -->
@@ -119,11 +129,17 @@
             </div>
           </div>
 
-          <div class="mt-8 flex justify-end">
-            <button class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-              Salvar Alterações
-            </button>
-          </div>
+          <div class="mt-8 flex justify-between gap-4">
+  <!-- Logout Button -->
+  <button id="logout-btn" class="flex items-center flex-1 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+    <i class="bi bi-box-arrow-right"></i>
+    <span class="ml-3">Sair</span>
+  </button>
+  <button class="flex-1 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+    Salvar Alterações
+  </button>
+</div>
+
         </div>
       </div>
     </main>
