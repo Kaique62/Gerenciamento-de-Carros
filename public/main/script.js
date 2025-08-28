@@ -251,6 +251,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function updateCarImages(licensePlate, images) {
+        try {
+            if (!licensePlate) {
+                throw new Error("licensePlate is required");
+            }
+            if (!images || images.length === 0) {
+                throw new Error("No images provided");
+            }
+
+            const formData = new FormData();
+            formData.append("license_plate", licensePlate);
+            images.forEach(img => formData.append("images", img));
+
+            const response = await fetch(`${API_URL}/images/replace`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Image update failed: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (err) {
+            return { error: err.message };
+        }
+    }
+
+
     async function sellCar(saleData) {
         try {
             const response = await fetch(`${API_URL_SELL}/sales/add`, {
@@ -603,72 +632,89 @@ return `
         openModal(modal);
     }
 
-    // Event Handlers
-    async function handleAddFormSubmit(event) {
-        event.preventDefault();
-        const form = event.target;
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalButtonText = submitButton.innerHTML;
-        
-        try {
-            submitButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Salvando...';
-            submitButton.disabled = true;
-            
-            // Get form data
-            const formData = new FormData(form);
-            const carData = {
-                name: formData.get('name'),
-                license_plate: formData.get('license_plate'),
-                year: formData.get('year'),
-                price: parseFloat(formData.get('price')),
-                mileage: parseInt(formData.get('mileage'), 10),
-                chassis: formData.get('chassis'),
-                registration_number: formData.get('registration_number'),
-                ownership_document: formData.get('ownership_document'),
-                ipva_tax_years: formData.get('ipva_tax_years'),
-                description: formData.get('description'),
-                status: 'available'
-            };
-            
-            // Handle images
-            const mainImageFile = formData.get('mainImage');
-            const additionalImages = Array.from(fileStore.files); // garante que é array
-            
-            // Add/update car
-            let result;
-            if (form.dataset.mode === 'edit') {
-                // Update existing car
-                result = await updateCar(form.dataset.editingPlate, carData);
+        // Event Handlers
+async function handleAddFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+
+    try {
+        submitButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Salvando...';
+        submitButton.disabled = true;
+
+        // Gather form data
+        const formData = new FormData(form);
+        const carData = {
+            name: formData.get('name'),
+            license_plate: formData.get('license_plate'),
+            year: formData.get('year'),
+            price: parseFloat(formData.get('price')),
+            mileage: parseInt(formData.get('mileage'), 10),
+            chassis: formData.get('chassis'),
+            registration_number: formData.get('registration_number'),
+            ownership_document: formData.get('ownership_document'),
+            ipva_tax_years: formData.get('ipva_tax_years'),
+            description: formData.get('description'),
+            status: 'available'
+        };
+
+        // Handle images
+        const mainInput = form.querySelector('input[name="mainImage"]');
+        const pickedMain = formData.get('mainImage'); // user-picked file (may be empty)
+        const additionalImages = Array.from(fileStore.files); // existing extra images
+
+        // Add or update car
+        const result = (form.dataset.mode === 'edit')
+            ? await updateCar(form.dataset.editingPlate, carData)
+            : await addCar(carData);
+
+        if (result?.error) throw new Error(result.error);
+
+        // Upload images
+        if (form.dataset.mode !== 'edit') {
+            // ADD mode: require a main image
+            if (pickedMain && pickedMain.size > 0) {
+                await uploadCarImages(carData.license_plate, [pickedMain, ...additionalImages]);
+            }
+        } else {
+            // EDIT mode: use user-picked main image if any, else fetch from preview <img>
+            let effectiveMain = null;
+
+            if (pickedMain && pickedMain.size > 0) {
+                effectiveMain = pickedMain;
             } else {
-                // Add new car
-                result = await addCar(carData);
+                // fetch main image from the preview <img>
+                const mainPreview = form.querySelector('.mainImagePreview');
+                if (mainPreview && mainPreview.src) {
+                    const res = await fetch(mainPreview.src);
+                    const blob = await res.blob();
+                    effectiveMain = new File([blob], 'main_image.png', { type: blob.type });
+                }
             }
-            
-            if (result.error) {
-                throw new Error(result.error);
+
+            const images = [];
+            if (effectiveMain) images.push(effectiveMain);
+            images.push(...additionalImages);
+
+            if (images.length > 0) {
+                await updateCarImages(form.dataset.editingPlate, images);
             }
-            
-            // Upload images if any
-            console.log(mainImageFile)
-            console.log(additionalImages)
-            if (mainImageFile && mainImageFile.size > 0) {
-                const images = [mainImageFile, ...additionalImages];
-                await uploadCarImages(carData.license_plate, images);
-            }
-            
-            // Refresh car list
-            await renderCarCards();
-            closeModal(addModal);
-            
-            // Show success message
-            alert(`Veículo ${form.dataset.mode === 'edit' ? 'atualizado' : 'adicionado'} com sucesso!`);
-        } catch (error) {
-            alert(`Erro ao ${form.dataset.mode === 'edit' ? 'atualizar' : 'adicionar'} veículo: ${error.message}`);
-        } finally {
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
         }
+
+        // Refresh UI
+        await renderCarCards();
+        closeModal(addModal);
+        alert(`Veículo ${form.dataset.mode === 'edit' ? 'atualizado' : 'adicionado'} com sucesso!`);
+    } catch (error) {
+        alert(`Erro ao ${form.dataset.mode === 'edit' ? 'atualizar' : 'adicionar'} veículo: ${error.message}`);
+    } finally {
+        submitButton.innerHTML = originalButtonText;
+        submitButton.disabled = false;
     }
+}
+
+
 
     async function handleSellFormSubmit(event) {
         event.preventDefault();

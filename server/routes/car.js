@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/images/upload', upload.array('images', 10), async (req, res) => {
+router.post('/images/upload', upload.array('images'), async (req, res) => {
     const licensePlate = req.body.license_plate;
 
     if (!licensePlate) {
@@ -59,6 +59,40 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
         files: req.files.map(f => f.filename)
     });
 });
+
+router.post('/images/replace', upload.array('images', 10), async (req, res) => {
+    const licensePlate = req.body.license_plate;
+
+    if (!licensePlate) {
+        return res.status(400).json({ error: 'license_plate is required in body' });
+    }
+
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+    }
+
+    // remove existing images
+    db.prepare(`DELETE FROM images WHERE car_license_plate = ?`).run(licensePlate);
+
+    const insertImage = db.prepare(`
+        INSERT INTO images (car_license_plate, link, idx)
+        VALUES (?, ?, ?)
+    `);
+
+    req.files.forEach((file, idx) => {
+        insertImage.run(
+            licensePlate,
+            `/api/data/images/${file.filename}`,
+            idx
+        );
+    });
+
+    res.json({
+        message: 'Images replaced successfully',
+        files: req.files.map(f => f.filename)
+    });
+});
+
 
 
 // Get images for a car
