@@ -624,7 +624,7 @@ return `
             
             // Handle images
             const mainImageFile = formData.get('mainImage');
-            const additionalImages = fileStore.files;
+            const additionalImages = Array.from(fileStore.files); // garante que é array
             
             // Add/update car
             let result;
@@ -641,13 +641,11 @@ return `
             }
             
             // Upload images if any
-            if (mainImageFile.size > 0) {
-                const images = [];
-                if (mainImageFile.size > 0) images.push(mainImageFile);
-                for (const additionalImageFile of additionalImages) {
-                    images.push(additionalImageFile);
-                }
-                const uploadResult = await uploadCarImages(carData.license_plate, images);
+            console.log(mainImageFile)
+            console.log(additionalImages)
+            if (mainImageFile && mainImageFile.size > 0) {
+                const images = [mainImageFile, ...additionalImages];
+                await uploadCarImages(carData.license_plate, images);
             }
             
             // Refresh car list
