@@ -4,6 +4,7 @@ const db = require('../database');
 const multer = require('multer');
 const path = require('path');
 const { triggerAsyncId } = require('async_hooks');
+const fs = require('fs');
 
 //#region IMAGE STUFF
 const storage = multer.diskStorage({
@@ -12,11 +13,11 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
+        // Use millisecond precision and a random component
         const now = new Date();
-        const timestamp = now.toISOString()
-            .replace(/:/g, '-')
-            .replace(/\..+/, ''); 
-        cb(null, `${timestamp}${ext}`);
+        const timestamp = now.getTime(); // Milliseconds since epoch
+        const random = Math.floor(Math.random() * 10000); // Random number for uniqueness
+        cb(null, `${timestamp}_${random}${ext}`);
     }
 });
 
@@ -33,6 +34,9 @@ router.post('/images/upload', upload.array('images'), async (req, res) => {
         return res.status(400).json({ error: 'No files uploaded' });
     }
 
+    // DEBUG: Log original files
+    console.log('Original files:', req.files.map(f => f.filename));
+
     // fetch existing images for this car
     const existingImages = db.prepare(`
         SELECT * FROM images WHERE car_license_plate = ?
@@ -44,55 +48,51 @@ router.post('/images/upload', upload.array('images'), async (req, res) => {
         VALUES (?, ?, ?)
     `);
 
-    let nextIdx = existingImages.length; // continue indexing
+    let nextIdx = existingImages.length;
+    const insertedFilenames = [];
 
+    // Process files with unique names
     req.files.forEach((file, i) => {
-        insertImage.run(
-            licensePlate,
-            `/api/data/images/${file.filename}`,
-            nextIdx + i
-        );
+        // Get the original file extension
+        const originalName = file.originalname;
+        const ext = path.extname(originalName);
+        
+        // Create a unique name with timestamp and index
+        const timestamp = Date.now();
+        const uniqueFilename = `${timestamp}_${i}_${licensePlate.replace(/\s+/g, '_')}${ext}`;
+        
+        // Build old and new paths
+        const oldPath = file.path;
+        const newPath = path.join(file.destination, uniqueFilename);
+
+        // Rename the actual file on disk
+        try {
+            if (fs.existsSync(oldPath)) {
+                fs.renameSync(oldPath, newPath);
+                
+                // Insert into database
+                insertImage.run(
+                    licensePlate,
+                    `/api/data/images/${uniqueFilename}`,
+                    nextIdx + i
+                );
+                
+                insertedFilenames.push(uniqueFilename);
+                console.log(`Saved: ${uniqueFilename}`);
+            } else {
+                console.error(`File not found: ${oldPath}`);
+            }
+        } catch (error) {
+            console.error(`Error processing file ${i}:`, error);
+        }
     });
 
     res.json({
         message: 'Images uploaded successfully',
-        files: req.files.map(f => f.filename)
+        files: insertedFilenames,
+        count: insertedFilenames.length
     });
 });
-
-router.post('/images/replace', upload.array('images', 10), async (req, res) => {
-    const licensePlate = req.body.license_plate;
-
-    if (!licensePlate) {
-        return res.status(400).json({ error: 'license_plate is required in body' });
-    }
-
-    if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: 'No files uploaded' });
-    }
-
-    // remove existing images
-    db.prepare(`DELETE FROM images WHERE car_license_plate = ?`).run(licensePlate);
-
-    const insertImage = db.prepare(`
-        INSERT INTO images (car_license_plate, link, idx)
-        VALUES (?, ?, ?)
-    `);
-
-    req.files.forEach((file, idx) => {
-        insertImage.run(
-            licensePlate,
-            `/api/data/images/${file.filename}`,
-            idx
-        );
-    });
-
-    res.json({
-        message: 'Images replaced successfully',
-        files: req.files.map(f => f.filename)
-    });
-});
-
 
 
 // Get images for a car
